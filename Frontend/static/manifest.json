@@ -1,0 +1,16 @@
+{
+  "name": "Asistencia Inteligente UNINPAHU",
+  "short_name": "Asistencia",
+  "description": "Sistema de asistencia con geolocalización para UNINPAHU",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002855",
+  "theme_color": "#FF4D00",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3200/3200155.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

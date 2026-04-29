@@ -1,0 +1,17 @@
+[
+    {
+        "student_id": "EST-UNINPAHU-2024-001",
+        "name": "Edinsson Estudiante",
+        "materias": ["Bases de Datos I", "Programación Web"]
+    },
+    {
+        "student_id": "EST-UNINPAHU-2024-002",
+        "name": "Juan Perez",
+        "materias": ["Bases de Datos I", "Cálculo Integral"]
+    },
+    {
+        "student_id": "EST-UNINPAHU-2024-003",
+        "name": "Maria Gomez",
+        "materias": ["Bases de Datos I", "Sistemas Operativos"]
+    }
+]
