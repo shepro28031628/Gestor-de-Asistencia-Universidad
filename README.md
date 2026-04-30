@@ -96,9 +96,4 @@ Estas pruebas verifican:
 - **Geofencing**: El sistema compara la latitud/longitud del usuario contra el centro de la sede universitaria con un margen de error configurable de 50 metros.
 - **Sesiones Únicas**: Cada código QR es válido solo para una sesión y un horario específico, evitando registros fraudulentos desde fuera del aula.
 
----
-
-## 📝 Licencia e Institución
-Este software fue desarrollado exclusivamente para la **Fundación Universitaria para el Desarrollo Humano UNINPAHU**. 
-
 **Desarrollado con ❤️ para la comunidad académica.**
