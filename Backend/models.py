@@ -91,4 +91,26 @@ CREATE TABLE IF NOT EXISTS attendances (
     FOREIGN KEY (student_id) REFERENCES users(id),
     FOREIGN KEY (session_id) REFERENCES class_sessions(id)
 );
+
+CREATE TABLE IF NOT EXISTS citations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    teacher_id INTEGER,
+    student_id INTEGER,
+    message TEXT,
+    status TEXT DEFAULT 'activa',
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES users(id),
+    FOREIGN KEY (student_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS justifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER,
+    schedule_id INTEGER,
+    file_path TEXT,
+    status TEXT DEFAULT 'pendiente',
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (schedule_id) REFERENCES schedules(id)
+);
 '''

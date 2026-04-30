@@ -50,7 +50,7 @@ graph TD
 - **/Backend**: Lógica del servidor, rutas de API y gestión de base de datos.
 - **/Frontend**: Plantillas HTML (Jinja2) y activos estáticos (CSS, JS, Imágenes).
 - **/static/uploads**: Directorio seguro para fotos de perfil y justificaciones.
-- **database_schema.md**: Documentación detallada de las 11 tablas del sistema.
+- **database_schema.md**: Documentación detallada de las 12 tablas del sistema.
 - **api_endpoints.md**: Catálogo completo de las 15 rutas de la API REST.
 
 ---
