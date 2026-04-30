@@ -1,104 +1,66 @@
 {% extends "layout.html" %}
-
-{% block title %}Bienvenidos - UNINPAHU Asistencia{% endblock %}
-
 {% block content %}
-<div class="min-h-[80vh] flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto animate-in fade-in duration-1000">
-    <!-- Logo y Cabecera -->
-    <div class="text-center mb-12">
-        <div class="relative inline-block mb-6">
-            <div class="w-32 h-24 bg-white rounded-3xl shadow-2xl flex items-center justify-center p-2 transform -rotate-6 hover:rotate-0 transition-transform duration-500 border border-slate-100 overflow-hidden">
-                <img src="/static/qrs/LOGO.png" alt="UNINPAHU Logo" class="w-full h-full object-contain">
-            </div>
-            <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-accent rounded-2xl shadow-lg flex items-center justify-center text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-        </div>
-        <h1 class="text-4xl font-black text-uninpahu tracking-tighter uppercase leading-none">Asistencia</h1>
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.4em] mt-2">Plataforma Académica</p>
-    </div>
-
-    <!-- Formulario de Login -->
-    <div class="glass w-full p-10 rounded-[3rem] shadow-2xl border-white/50 backdrop-blur-xl space-y-6">
-        <div class="flex p-1 bg-slate-100 rounded-2xl mb-8">
-            <button onclick="setRole('estudiante')" id="btn-estudiante" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-uninpahu transition-all">Estudiante</button>
-            <button onclick="setRole('profesor')" id="btn-profesor" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-uninpahu transition-all">Docente</button>
+<div class="min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-md w-full glass-card p-10 animate-in">
+        <div class="text-center mb-10">
+            <!-- LOGO LOCAL SEGURO -->
+            <img src="/static/img/logo.png" alt="UNINPAHU" class="h-24 mx-auto mb-4 drop-shadow-md">
+            <h1 class="text-3xl font-black text-[#002B49] tracking-tighter uppercase">Asistencia</h1>
+            <p class="text-slate-500 font-bold text-[10px] tracking-[0.2em] uppercase mt-2">Plataforma Académica</p>
         </div>
 
-        <div class="space-y-4">
-            <div class="relative group">
-                <label class="block text-[10px] font-black text-uninpahu uppercase tracking-widest mb-2 ml-1">Usuario Institucional</label>
-                <input type="text" id="username" placeholder="Ej: 10102030" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 font-bold text-slate-700 focus:border-accent focus:bg-white transition-all outline-none">
-            </div>
-
-            <div class="relative group">
-                <label class="block text-[10px] font-black text-uninpahu uppercase tracking-widest mb-2 ml-1">Contraseña</label>
-                <input type="password" id="password" placeholder="••••••••" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 font-bold text-slate-700 focus:border-accent focus:bg-white transition-all outline-none">
-            </div>
+        <div class="bg-slate-100 p-1.5 rounded-2xl mb-8 flex gap-1 border border-slate-200">
+            <button onclick="setRole('estudiante')" id="btn-estudiante" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[#002B49] transition-all">Estudiante</button>
+            <button onclick="setRole('profesor')" id="btn-profesor" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-[#002B49] transition-all">Docente</button>
         </div>
 
-        <button onclick="handleLogin()" id="login-btn" class="w-full btn-uninpahu-navy py-5 text-sm shadow-xl shadow-blue-100 group">
-            <span class="flex items-center justify-center gap-2 group-hover:gap-4 transition-all">
-                Ingresar al Portal
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </span>
-        </button>
+        <div class="space-y-5">
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-[#002B49] uppercase tracking-widest ml-1">Usuario Institucional</label>
+                <input type="text" id="username" placeholder="Tu usuario o documento" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:border-[#002B49] outline-none font-bold text-[#002B49]">
+            </div>
 
-        <div class="text-center">
-            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">© 2024 Fundación Universitaria para el Desarrollo Humano</p>
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-[#002B49] uppercase tracking-widest ml-1">Contraseña</label>
+                <input type="password" id="password" placeholder="••••" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:border-[#002B49] outline-none font-bold text-[#002B49]">
+            </div>
+
+            <button onclick="handleLogin()" class="w-full bg-[#002B49] text-white py-5 rounded-2xl font-black shadow-xl active:scale-95 transition-all mt-4 flex items-center justify-center gap-3">
+                <span>INGRESAR AL PORTAL</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    let currentRole = 'estudiante';
+let currentRole = 'estudiante';
+function setRole(role) {
+    currentRole = role;
+    const btnEst = document.getElementById('btn-estudiante');
+    const btnProf = document.getElementById('btn-profesor');
+    const active = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[#002B49] transition-all";
+    const inactive = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-[#002B49] transition-all";
+    btnEst.className = role === 'estudiante' ? active : inactive;
+    btnProf.className = role === 'profesor' ? active : inactive;
+}
 
-    function setRole(role) {
-        currentRole = role;
-        const btnEst = document.getElementById('btn-estudiante');
-        const btnProf = document.getElementById('btn-profesor');
-        
-        if (role === 'estudiante') {
-            btnEst.className = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-uninpahu transition-all";
-            btnProf.className = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-uninpahu transition-all";
-        } else {
-            btnProf.className = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-uninpahu transition-all";
-            btnEst.className = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-uninpahu transition-all";
-        }
-    }
+async function handleLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    if (!username || !password) return showToast("Completa los datos", "warning");
 
-    async function handleLogin() {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        const btn = document.getElementById('login-btn');
-
-        if(!user || !pass) {
-            showToast("Completa tus credenciales", "warning");
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = "Validando...";
-
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username: user, password: pass, role: currentRole })
-            });
-            const data = await response.json();
-            if (data.success) {
-                showToast("¡Bienvenido!", "success");
-                setTimeout(() => window.location.href = `/${currentRole}`, 800);
-            } else {
-                showToast(data.error, "error");
-                btn.disabled = false;
-                btn.innerHTML = "Ingresar al Portal";
-            }
-        } catch (e) {
-            showToast("Error de conexión", "error");
-            btn.disabled = false;
-        }
-    }
+    try {
+        const response = await fetch('http://localhost:5001/api/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ username, password, role: currentRole })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        localStorage.setItem('user', JSON.stringify({username: data.username, name: data.full_name, role: data.role, id: data.user_id}));
+        window.location.href = data.role === 'profesor' ? '/profesor' : '/estudiante';
+    } catch (e) { showToast("Acceso denegado", "error"); }
+}
 </script>
 {% endblock %}

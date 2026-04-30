@@ -1,116 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;700;900&display=swap');
-
-:root {
-    --uninpahu-blue: #002855;
-    --uninpahu-orange: #FF4D00;
-    --accent: #FF4D00;
-    --navy: #002855;
-    --glass: rgba(255, 255, 255, 0.85);
-}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap');
 
 body {
     font-family: 'Outfit', sans-serif;
-    background: linear-gradient(rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.95)), url('/static/img/uninpahu_bg.png');
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    /* RESTAURACIÓN DE FONDO INSTITUCIONAL CON FILTRO CRISTALINO */
+    background-image: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), 
+                      url('/static/img/uninpahu_bg.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    color: #1e293b;
-    -webkit-font-smoothing: antialiased;
 }
 
-.glass {
-    background: var(--glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
-}
-
-.btn-uninpahu-navy {
-    background: var(--navy);
-    color: white;
-    border-radius: 1.25rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    cursor: pointer;
-}
-
-.btn-uninpahu-navy:hover {
-    background: #001a38;
-    transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(0, 40, 85, 0.2);
+.glass-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(15px) saturate(160%);
+    -webkit-backdrop-filter: blur(15px) saturate(160%);
+    border-radius: 2.5rem;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 .btn-uninpahu-orange {
-    background: var(--uninpahu-orange);
+    background-color: #FF4D00;
     color: white;
     border-radius: 1.25rem;
+    box-shadow: 0 10px 25px -5px rgba(255, 77, 0, 0.4);
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    cursor: pointer;
 }
 
-.btn-uninpahu-orange:hover {
-    background: #e64500;
-    transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(255, 77, 0, 0.2);
+/* NAVEGACIÓN Y TABS */
+.bg-slate-200\/50 {
+    background-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Animaciones */
-.animate-in {
-    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Toasts Personalizados */
-#toast-container {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-}
-
-.toast {
-    padding: 1rem 2rem;
-    border-radius: 1.5rem;
+button[id^="tab-"].bg-white {
+    color: #002B49 !important;
     font-weight: 900;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    animation: slideUp 0.4s ease-out forwards;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-/* Scrollbar Estilizada */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
 }
