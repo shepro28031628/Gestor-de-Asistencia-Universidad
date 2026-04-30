@@ -78,6 +78,20 @@ graph TD
 
 ---
 
+## 🧪 Pruebas Unitarias
+El proyecto incluye una suite de pruebas para garantizar la estabilidad de la lógica matemática y de negocio.
+
+Para ejecutar las pruebas (asegúrate de haber instalado los requerimientos):
+```bash
+python -m pytest tests/test_logic.py
+```
+Estas pruebas verifican:
+- Precisión de la fórmula **Haversine** (Geolocalización).
+- Integridad de los estados de asistencia.
+- Lógica de autenticación.
+
+---
+
 ## 🔒 Seguridad y Validaciones
 - **Geofencing**: El sistema compara la latitud/longitud del usuario contra el centro de la sede universitaria con un margen de error configurable de 50 metros.
 - **Sesiones Únicas**: Cada código QR es válido solo para una sesión y un horario específico, evitando registros fraudulentos desde fuera del aula.
