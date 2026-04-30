@@ -1,38 +1,90 @@
-# UNINPAHU Asistencia - PWA 🎓🚀
+# UNINPAHU Asistencia - PWA de Gestión Académica 🎓🚀
 
-**UNINPAHU Asistencia** es un ecosistema digital diseñado para modernizar el registro de asistencia universitaria mediante el uso de códigos QR dinámicos, geolocalización institucional y una experiencia de usuario de alta fidelidad (Glassmorphism).
+![UNINPAHU Logo](Frontend/static/img/logo.png)
 
-## ✨ Características Principales
-- **PWA (Progressive Web App)**: Instalable en dispositivos Android e iOS sin pasar por la App Store.
-- **Validación Dual**: Combina escaneo de QR con validación de coordenadas GPS (Geofencing).
-- **Seguimiento en Tiempo Real**: Los profesores monitorean quién entra a clase al instante.
-- **Justificaciones Digitales**: Los alumnos pueden subir sus excusas médicas directamente desde el portal.
-- **Identidad Visual**: Diseño premium alineado con la marca institucional UNINPAHU.
-
-## 🚀 Tecnologías Utilizadas
-- **Backend**: Python 3 + Flask.
-- **Base de Datos**: SQLite (Relacional).
-- **Frontend**: HTML5, Vanilla JavaScript, CSS3 (Glassmorphism Design).
-- **Seguridad**: Werkzeug + Geolocation API.
-
-## 🛠️ Instalación y Ejecución
-
-1. **Clonar el repositorio o descargar el código.**
-2. **Instalar dependencias:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Iniciar el servidor:**
-   ```bash
-   python Backend/app.py
-   ```
-4. **Acceder a la aplicación:**
-   Abre tu navegador en `http://localhost:5001`
+**UNINPAHU Asistencia** es una solución integral de software diseñada para optimizar y asegurar el registro de asistencia en entornos universitarios. Utilizando tecnologías web modernas, el sistema ofrece una experiencia interactiva en tiempo real que combina la facilidad de uso con la seguridad institucional.
 
 ---
 
-## 👥 Credenciales de Prueba
-- **Estudiante**: `2025100001` / Pass: `123`
-- **Profesor**: `elfar_morantes` / Pass: `123`
+## 🌟 Visión General
+El proyecto transforma el proceso tradicional de llamado a lista en una interacción digital dinámica. Los profesores generan sesiones de clase protegidas por geolocalización, y los estudiantes validan su presencia mediante escaneo de códigos QR, asegurando que el registro solo pueda realizarse dentro del campus universitario.
 
-Desarrollado para la **Fundación Universitaria para el Desarrollo Humano UNINPAHU**.
+---
+
+## ✨ Características de Alto Nivel
+
+### 👨‍🎓 Portal Estudiantil
+- **Validación Dual**: Verificación de ubicación GPS sincronizada con los campus de UNINPAHU.
+- **Seguimiento de Progreso**: Indicadores visuales de porcentaje de asistencia para prevenir riesgos académicos.
+- **Gestión de Excusas**: Módulo de carga de documentos (PDF/JPG) para justificación de inasistencias.
+- **PWA Ready**: Acceso directo desde el escritorio del móvil con modo pantalla completa.
+
+### 👨‍🏫 Panel Docente (Pro)
+- **Control QR Dinámico**: Generación de tokens únicos con tiempo de expiración.
+- **Monitoreo en Vivo**: Lista de asistentes que se actualiza automáticamente cada 3 segundos.
+- **Intervención Temprana**: Sistema de alertas de deserción con botón de "Citación Académica".
+- **Gestión Manual**: Capacidad de validar asistencia para casos especiales de fallos técnicos.
+
+---
+
+## 🛠️ Stack Tecnológico
+- **Core**: Python 3.10+ & Flask.
+- **Base de Datos**: SQLite3 con arquitectura relacional.
+- **Frontend**: HTML5 Semántico, JavaScript ES6+, CSS3 (Glassmorphism & Tailwind-style utilities).
+- **Assets**: PWA Manifest, Service Workers para caching y modo offline básico.
+
+---
+
+## 🏗️ Arquitectura del Proyecto
+```mermaid
+graph TD
+    A[Cliente Estudiante] -->|QR Scan + GPS| B[Flask API]
+    C[Cliente Profesor] -->|Activar Sesión| B
+    B -->|SQL Queries| D[(SQLite DB)]
+    B -->|Almacenamiento| E[FileSystem /uploads]
+```
+
+---
+
+## 📦 Estructura del Repositorio
+- **/Backend**: Lógica del servidor, rutas de API y gestión de base de datos.
+- **/Frontend**: Plantillas HTML (Jinja2) y activos estáticos (CSS, JS, Imágenes).
+- **/static/uploads**: Directorio seguro para fotos de perfil y justificaciones.
+- **database_schema.md**: Documentación detallada de las 11 tablas del sistema.
+- **api_endpoints.md**: Catálogo completo de las 15 rutas de la API REST.
+
+---
+
+## 🚀 Guía de Instalación Rápida
+
+1. **Preparar el entorno**:
+   ```bash
+   git clone https://github.com/tu-usuario/asistencia-uninpahu.git
+   cd asistencia-uninpahu
+   ```
+
+2. **Instalar Dependencias**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Ejecutar el Servidor**:
+   ```bash
+   python Backend/app.py
+   ```
+
+4. **Acceso Local**:
+   Navega a [http://localhost:5001](http://localhost:5001)
+
+---
+
+## 🔒 Seguridad y Validaciones
+- **Geofencing**: El sistema compara la latitud/longitud del usuario contra el centro de la sede universitaria con un margen de error configurable de 50 metros.
+- **Sesiones Únicas**: Cada código QR es válido solo para una sesión y un horario específico, evitando registros fraudulentos desde fuera del aula.
+
+---
+
+## 📝 Licencia e Institución
+Este software fue desarrollado exclusivamente para la **Fundación Universitaria para el Desarrollo Humano UNINPAHU**. 
+
+**Desarrollado con ❤️ para la comunidad académica.**
