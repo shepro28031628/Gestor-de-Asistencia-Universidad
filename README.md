@@ -2,7 +2,7 @@
 
 ![UNINPAHU Logo](Frontend/static/img/logo.png)
 
-**UNINPAHU Asistencia** es una solución integral de software diseñada para optimizar y asegurar el registro de asistencia en entornos universitarios. Utilizando tecnologías web modernas, el sistema ofrece una experiencia interactiva en tiempo real que combina la facilidad de uso con la seguridad institucional de grado bancario.
+**UNINPAHU Asistencia** es una solución integral de software diseñada para optimizar y asegurar el registro de asistencia en el entorno universitario de UNINPAHU, contribuyendo a una mejor gestión académica y la interacción entre docentes y estudiantes.
 
 ---
 
@@ -43,7 +43,6 @@ graph TD
     B -->|Auditoría Minuto a Minuto| D[Monitor de Horarios]
     D -->|Auto-Cierre| E[Reporte Email SMTP]
     B -->|SQL WAL Mode| F[(SQLite DB)]
-```
 
 ---
 
@@ -51,8 +50,12 @@ graph TD
 - **/Backend**: Rutas API, lógica de seguridad y el `monitor_de_horarios`.
 - **/Frontend**: Plantillas PWA y activos estáticos optimizados.
 - **/docs**: 
-  - [asistencia.md](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/asistencia.md): Detalles del flujo de seguridad y rotación QR.
-  - [persistencia.md](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/persistencia.md): Documentación del modo WAL y cola offline.
+  - [📘 Manual de Usuario](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/MANUAL_USUARIO.md): Guía para docentes y estudiantes.
+  - [📱 Configuración PWA](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/PWA_SETUP.md): Pasos para instalar como aplicación nativa.
+  - [🔑 Seguridad y QR](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/asistencia.md): Detalles del flujo de rotación y validación.
+  - [🗄️ Esquema de Base de Datos](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/database_schema.md): Estructura de tablas y relaciones SQLite.
+  - [🌐 API Endpoints](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/api_endpoints.md): Documentación de rutas y parámetros.
+  - [💾 Persistencia Offline](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/persistencia.md): Funcionamiento del modo WAL y cola local.
 
 ---
 
@@ -79,4 +82,4 @@ graph TD
 2. **Dynamic QR**: El token cambia constantemente, haciendo obsoletas las capturas de pantalla.
 3. **Grace Window**: Permite procesar escaneos legítimos que tardan unos segundos en viajar por la red tras un cambio de QR.
 
-**Desarrollado con ❤️ para la comunidad académica de UNINPAHU.**
+
