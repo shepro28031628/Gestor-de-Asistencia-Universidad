@@ -3,7 +3,7 @@ from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from database import init_db
 from routes.auth import auth_bp
-from routes.attendance import attendance_bp
+from routes.attendance import attendance_bp, iniciar_monitor
 
 def create_app():
     # Configuramos Flask para que encuentre tus carpetas de Frontend
@@ -38,5 +38,7 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+    # INICIO DE MONITOR: Auto-cierre de clases y envío de reportes
+    iniciar_monitor(app)
     # Ejecutamos en el puerto 5001 para que coincida con tu configuración
     app.run(debug=True, port=5001)

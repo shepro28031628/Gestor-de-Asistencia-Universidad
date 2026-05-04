@@ -55,7 +55,11 @@
                     <h3 class="text-[10px] font-black text-[#002B49] uppercase tracking-widest mb-6 flex justify-between items-center">
                         Asistencia en Vivo <span id="counter" class="bg-[#002B49] text-white px-3 py-1 rounded-full text-[8px]">0/0</span>
                     </h3>
-                    <div id="live-student-list" class="space-y-2"></div>
+                    <div id="live-student-list" class="space-y-2 mb-8"></div>
+                    
+                    <button onclick="finalizar()" class="w-full bg-[#002B49] text-white py-4 rounded-2xl font-black shadow-lg uppercase text-[9px] tracking-[0.2em] hover:bg-slate-800 transition-all">
+                        <i class="fas fa-file-export mr-2"></i> Finalizar y Enviar Reporte
+                    </button>
                 </div>
             </div>
         </div>
@@ -166,10 +170,49 @@ async function activar() {
     } catch (e) { }
 }
 
+async function finalizar() {
+    if (!confirm("¿Deseas cerrar la asistencia y enviar el reporte por correo?")) return;
+    try {
+        const resp = await fetch('http://localhost:5001/api/attendance/finalizar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ schedule_id: activeScheduleId })
+        });
+        const d = await resp.json();
+        if (d.success) {
+            showToast(d.message, "success");
+            if (pollInterval) clearInterval(pollInterval);
+            document.getElementById('qr-container').classList.add('hidden');
+            document.getElementById('real-time-panel').classList.add('hidden');
+            document.getElementById('btn-activar').classList.remove('hidden');
+            activeScheduleId = null;
+        }
+    } catch (e) { showToast("Error al finalizar", "error"); }
+}
+
+
 function startPolling() {
     if (pollInterval) clearInterval(pollInterval);
     updateLiveList();
-    pollInterval = setInterval(updateLiveList, 3000); // Super rápido: 3 segundos
+    pollInterval = setInterval(() => {
+        updateLiveList();
+        updateQRCode(); // Rotación de seguridad
+    }, 3000); 
+}
+
+async function updateQRCode() {
+    if (!activeScheduleId) return;
+    try {
+        const resp = await fetch(`http://localhost:5001/api/attendance/token-vivo/${activeScheduleId}`);
+        const data = await resp.json();
+        const qrContainer = document.getElementById('qrcode');
+        // Solo regeneramos si el token cambió para evitar parpadeos innecesarios
+        if (qrContainer.getAttribute('data-token') !== data.token) {
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: data.token, width: 200, height: 200 });
+            qrContainer.setAttribute('data-token', data.token);
+        }
+    } catch (e) {}
 }
 
 async function updateLiveList() {

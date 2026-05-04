@@ -44,9 +44,9 @@ Calcula el porcentaje de asistencia acumulado por materia.
 Obtiene todos los registros de asistencia globales (Uso administrativo/auditoría).
 
 ### 8. `POST /activar`
-(Docente) Genera un nuevo código QR y activa la sesión de clase por 15 minutos.
+(Docente) Genera un **nuevo** código QR dinámico. Invalida automáticamente cualquier token generado previamente para el mismo horario en el día.
 *   **Body (JSON):** `{ "schedule_id" }`
-*   **Retorna:** `token`, `expires_at_ms`.
+*   **Retorna:** `token` (UUID único), `expires_at_ms`.
 
 ### 9. `GET /estudiantes-sesion/<schedule_id>`
 (Docente) Obtiene la lista de alumnos inscritos y su estado de asistencia hoy.

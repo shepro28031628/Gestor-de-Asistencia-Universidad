@@ -20,8 +20,8 @@ El proyecto transforma el proceso tradicional de llamado a lista en una interacc
 - **PWA Ready**: Acceso directo desde el escritorio del móvil con modo pantalla completa.
 
 ### 👨‍🏫 Panel Docente (Pro)
-- **Control QR Dinámico**: Generación de tokens únicos con tiempo de expiración.
-- **Monitoreo en Vivo**: Lista de asistentes que se actualiza automáticamente cada 3 segundos.
+- **Control QR Dinámico**: Generación de tokens únicos por cada activación, invalidando automáticamente el anterior para prevenir fraude.
+- **Monitoreo en Vivo**: Lista de asistentes que se actualiza automáticamente cada 3 segundos con efectos visuales de pulso.
 - **Intervención Temprana**: Sistema de alertas de deserción con botón de "Citación Académica".
 - **Gestión Manual**: Capacidad de validar asistencia para casos especiales de fallos técnicos.
 
@@ -31,7 +31,7 @@ El proyecto transforma el proceso tradicional de llamado a lista en una interacc
 - **Core**: Python 3.10+ & Flask.
 - **Base de Datos**: SQLite3 con arquitectura relacional.
 - **Frontend**: HTML5 Semántico, JavaScript ES6+, CSS3 (Glassmorphism & Tailwind-style utilities).
-- **Assets**: PWA Manifest, Service Workers para caching y modo offline básico.
+- **Assets**: PWA Manifest, Service Workers para caching y **Cola de Sincronización Offline** (LocalStorage) para garantizar persistencia sin red.
 
 ---
 
@@ -50,8 +50,9 @@ graph TD
 - **/Backend**: Lógica del servidor, rutas de API y gestión de base de datos.
 - **/Frontend**: Plantillas HTML (Jinja2) y activos estáticos (CSS, JS, Imágenes).
 - **/static/uploads**: Directorio seguro para fotos de perfil y justificaciones.
-- **database_schema.md**: Documentación detallada de las 12 tablas del sistema.
+- **database_schema.md**: Documentación detallada de las 12 tablas con soporte para integridad referencial y modo WAL.
 - **api_endpoints.md**: Catálogo completo de las 15 rutas de la API REST.
+- **/docs**: Manuales técnicos de persistencia y gestión de asistencia dinámica.
 
 ---
 

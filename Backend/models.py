@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     full_name TEXT NOT NULL,
+    email TEXT, -- Campo para reportes automáticos
     role TEXT CHECK(role IN ('estudiante', 'profesor', 'admin')) NOT NULL,
     program_id INTEGER,
     FOREIGN KEY (program_id) REFERENCES academic_programs(id)

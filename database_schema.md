@@ -1,6 +1,6 @@
 # Estructura de Base de Datos Final - UNINPAHU Asistencia 🗄️
 
-Este documento detalla la arquitectura completa de la base de datos SQLite (`asistencia.db`). Se ha actualizado para reflejar la implementación real que soporta geofencing, gestión académica y seguimiento de citaciones.
+Este documento detalla la arquitectura completa de la base de datos SQLite (`asistencia.db`). Se ha actualizado para reflejar la implementación real que soporta geofencing, gestión académica y seguimiento de citaciones. La base de datos opera en modo **WAL (Write-Ahead Logging)** para garantizar estabilidad en accesos concurrentes.
 
 ## 📊 Diagrama de Entidad-Relación (ERD)
 

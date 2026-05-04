@@ -7,6 +7,9 @@ def get_db():
     """Conexión a la base de datos con soporte para nombres de columnas (Row Factory)"""
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
+        # ESTABILIDAD: Modo WAL para evitar bloqueos y llaves foráneas para integridad
+        g.db.execute('PRAGMA journal_mode=WAL;')
+        g.db.execute('PRAGMA foreign_keys=ON;')
         # ESTA ES LA LÍNEA CRÍTICA: Permite acceder a datos como user['username'] en lugar de user[0]
         g.db.row_factory = sqlite3.Row
     return g.db

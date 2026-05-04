@@ -176,17 +176,56 @@ async function stopScanner() {
 async function processScan(token) {
     stopScanner();
     navigator.geolocation.getCurrentPosition(async pos => {
+        const payload = { token, student_id: user.id, lat: pos.coords.latitude, lng: pos.coords.longitude };
         try {
             const resp = await fetch('http://localhost:5001/api/attendance/marcar', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ token, student_id: user.id, lat: pos.coords.latitude, lng: pos.coords.longitude })
+                body: JSON.stringify(payload)
             });
             const d = await resp.json();
             showToast(d.message, d.success ? "success" : "error");
             sync();
-        } catch (e) { }
+        } catch (e) { 
+            // PERSISTENCIA OFFLINE: Si falla la red, guardamos en cola
+            saveToOfflineQueue(payload);
+            showToast("⚠️ Sin conexión. Registro guardado localmente.", "warning");
+        }
     });
+}
+
+// GESTIÓN DE COLA OFFLINE
+function saveToOfflineQueue(payload) {
+    let queue = JSON.parse(localStorage.getItem('attendance_queue') || '[]');
+    // Evitar duplicados del mismo token en la cola
+    if (!queue.find(q => q.token === payload.token)) {
+        queue.push({...payload, timestamp: new Date().toISOString()});
+        localStorage.setItem('attendance_queue', JSON.stringify(queue));
+    }
+}
+
+async function syncOfflineQueue() {
+    let queue = JSON.parse(localStorage.getItem('attendance_queue') || '[]');
+    if (queue.length === 0) return;
+
+    for (let i = 0; i < queue.length; i++) {
+        try {
+            const resp = await fetch('http://localhost:5001/api/attendance/marcar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(queue[i])
+            });
+            if (resp.ok) {
+                queue.splice(i, 1);
+                i--;
+            }
+        } catch (e) { break; } // Seguir offline
+    }
+    localStorage.setItem('attendance_queue', JSON.stringify(queue));
+    if (queue.length === 0) {
+        showToast("✅ Registros sincronizados correctamente", "success");
+        sync();
+    }
 }
 
 // Sondeo de Notificaciones Vivas y Validación de Asistencia (Cada 5 seg para interactividad)
@@ -304,7 +343,9 @@ async function loadMyHistory() {
 
 function logout() { localStorage.clear(); window.location.href = '/'; }
 sync();
+syncOfflineQueue();
 setInterval(checkLiveSessions, 5000);
+window.addEventListener('online', syncOfflineQueue);
 checkLiveSessions();
 </script>
 {% endblock %}

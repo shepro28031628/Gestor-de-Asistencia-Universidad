@@ -1,6 +1,11 @@
 import math
 import uuid
+import smtplib
+import threading
+import time
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from flask import Blueprint, request, jsonify
 from database import get_db
 
@@ -93,17 +98,201 @@ def marcar_asistencia():
 def activar_clase():
     data = request.json
     now = datetime.now()
+    schedule_id = data.get('schedule_id')
+    
     with get_db() as conn:
-        session_hoy = conn.execute('SELECT id, expires_at, qr_token FROM class_sessions WHERE schedule_id = ? AND date(created_at) = date("now")', (data.get('schedule_id'),)).fetchone()
-        if session_hoy:
-            expires_at = datetime.fromisoformat(session_hoy['expires_at'])
-            if now > expires_at: return jsonify({"success": False, "message": "Asistencia cerrada"}), 403
-            return jsonify({"success": True, "token": session_hoy['qr_token'], "expires_at_ms": int(expires_at.timestamp() * 1000)})
+        # DINAMISMO: Invalidamos cualquier sesión activa previa para este horario hoy
+        conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ? AND is_active = 1', (schedule_id,))
+        
+        # Generamos un token totalmente nuevo y único
         token = str(uuid.uuid4())
         expires_at = (now + timedelta(minutes=15)).isoformat()
-        conn.execute('INSERT INTO class_sessions (schedule_id, qr_token, expires_at, is_active) VALUES (?, ?, ?, 1)', (data.get('schedule_id'), token, expires_at))
+        
+        conn.execute('INSERT INTO class_sessions (schedule_id, qr_token, expires_at, is_active) VALUES (?, ?, ?, 1)', 
+                    (schedule_id, token, expires_at))
         conn.commit()
-        return jsonify({"success": True, "token": token, "expires_at_ms": int((now + timedelta(minutes=15)).timestamp() * 1000)})
+        
+        return jsonify({
+            "success": True, 
+            "token": token, 
+            "expires_at_ms": int((now + timedelta(minutes=15)).timestamp() * 1000)
+        })
+
+@attendance_bp.route('/token-vivo/<schedule_id>', methods=['GET'])
+def get_token_vivo(schedule_id):
+    """Genera o recupera el token actual, rotándolo cada 15 segundos."""
+    now = datetime.now()
+    with get_db() as conn:
+        # 1. Limpieza: Inactivar tokens con más de 60 segundos de antigüedad (Margen de gracia)
+        limite_gracia = (now - timedelta(seconds=60)).strftime("%Y-%m-%d %H:%M:%S")
+        conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ? AND created_at < ? AND is_active = 1', (schedule_id, limite_gracia))
+        
+        # 2. Buscar el token más reciente generado en los últimos 15 segundos
+        limite_rotacion = (now - timedelta(seconds=15)).strftime("%Y-%m-%d %H:%M:%S")
+        reciente = conn.execute('SELECT qr_token FROM class_sessions WHERE schedule_id = ? AND created_at >= ? AND is_active = 1 ORDER BY created_at DESC', (schedule_id, limite_rotacion)).fetchone()
+        
+        if reciente:
+            return jsonify({"token": reciente['qr_token']})
+        
+        # 3. Si no hay uno reciente, generar nuevo
+        nuevo_token = str(uuid.uuid4())
+        expires_at = (now + timedelta(minutes=15)).isoformat()
+        conn.execute('INSERT INTO class_sessions (schedule_id, qr_token, expires_at, is_active) VALUES (?, ?, ?, 1)', (schedule_id, nuevo_token, expires_at))
+        conn.commit()
+        return jsonify({"token": nuevo_token})
+
+@attendance_bp.route('/finalizar', methods=['POST'])
+def finalizar_clase():
+    """Cierra la sesión y envía reporte al docente."""
+    data = request.json
+    schedule_id = data.get('schedule_id')
+    
+    with get_db() as conn:
+        # 1. Obtener datos del reporte
+        query_info = '''
+            SELECT s.name as materia, u.full_name as profesor, u.email, r.code as salon
+            FROM schedules sch
+            JOIN groups g ON sch.group_id = g.id
+            JOIN subjects s ON g.subject_id = s.id
+            JOIN users u ON g.teacher_id = u.id
+            JOIN rooms r ON sch.room_id = r.id
+            WHERE sch.id = ?
+        '''
+        info = conn.execute(query_info, (schedule_id,)).fetchone()
+        if not info: return jsonify({"success": False, "message": "Horario no encontrado"}), 404
+        
+        # 2. Obtener lista de asistentes
+        query_asistentes = '''
+            SELECT u.full_name, u.username, a.timestamp, a.status
+            FROM attendances a
+            JOIN users u ON a.student_id = u.id
+            JOIN class_sessions cs ON a.session_id = cs.id
+            WHERE cs.schedule_id = ? AND date(cs.created_at) = date("now")
+            ORDER BY u.full_name ASC
+        '''
+        asistentes = conn.execute(query_asistentes, (schedule_id,)).fetchall()
+        
+        # 3. Inactivar sesión
+        conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ?', (schedule_id,))
+        conn.commit()
+        
+        # 4. Generar y enviar correo (Simulado/Configurable)
+        if info['email']:
+            enviar_reporte_email(info, asistentes)
+            
+        return jsonify({
+            "success": True, 
+            "message": "Clase finalizada y reporte enviado",
+            "count": len(asistentes)
+        })
+
+def cerrar_sesion_y_reportar(conn, schedule_id):
+    """Lógica centralizada de cierre para uso manual y automático."""
+    # 1. Obtener datos del reporte
+    query_info = '''
+        SELECT s.name as materia, u.full_name as profesor, u.email, r.code as salon
+        FROM schedules sch
+        JOIN groups g ON sch.group_id = g.id
+        JOIN subjects s ON g.subject_id = s.id
+        JOIN users u ON g.teacher_id = u.id
+        JOIN rooms r ON sch.room_id = r.id
+        WHERE sch.id = ?
+    '''
+    info = conn.execute(query_info, (schedule_id,)).fetchone()
+    if not info: return
+    
+    # 2. Obtener asistentes
+    query_asistentes = '''
+        SELECT u.full_name, u.username, a.timestamp, a.status
+        FROM attendances a
+        JOIN users u ON a.student_id = u.id
+        JOIN class_sessions cs ON a.session_id = cs.id
+        WHERE cs.schedule_id = ? AND date(cs.created_at) = date("now")
+        ORDER BY u.full_name ASC
+    '''
+    asistentes = conn.execute(query_asistentes, (schedule_id,)).fetchall()
+    
+    # 3. Inactivar
+    conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ?', (schedule_id,))
+    conn.commit()
+    
+    # 4. Reportar
+    if info['email']:
+        enviar_reporte_email(info, asistentes)
+
+def monitor_de_horarios(app_context):
+    """Hilo secundario que cierra clases automáticamente al finalizar el bloque horario."""
+    with app_context:
+        print("🕒 Monitor de Horarios Iniciado (Auto-Cierre)")
+        while True:
+            try:
+                now = datetime.now()
+                hora_actual = now.strftime("%H:%M")
+                dia_actual = get_dia_code(now)
+                
+                with get_db() as conn:
+                    # Buscamos sesiones activas cuyo horario ya terminó hoy
+                    query_expirados = '''
+                        SELECT cs.schedule_id 
+                        FROM class_sessions cs
+                        JOIN schedules sch ON cs.schedule_id = sch.id
+                        WHERE cs.is_active = 1 
+                        AND sch.day = ? 
+                        AND sch.end_time <= ?
+                    '''
+                    expirados = conn.execute(query_expirados, (dia_actual, hora_actual)).fetchall()
+                    
+                    for row in expirados:
+                        print(f"⏰ Auto-Cierre ejecutado para horario ID: {row['schedule_id']}")
+                        cerrar_sesion_y_reportar(conn, row['schedule_id'])
+            except Exception as e:
+                print(f"Error en monitor: {e}")
+            time.sleep(60) # Verificar cada minuto
+
+# Función para arrancar el monitor desde app.py o al registrar el blueprint
+def iniciar_monitor(app):
+    threading.Thread(target=monitor_de_horarios, args=(app.app_context(),), daemon=True).start()
+
+def enviar_reporte_email(info, asistentes):
+    """Lógica de envío de correo SMTP."""
+    msg = MIMEMultipart()
+    msg['From'] = "sistema.asistencia@uninpahu.edu.co"
+    msg['To'] = info['email']
+    msg['Subject'] = f"Reporte de Asistencia: {info['materia']} - {datetime.now().strftime('%d/%m/%Y')}"
+    
+    html = f"""
+    <html>
+        <body style="font-family: sans-serif; color: #002B49;">
+            <h2 style="color: #FF4D00;">Reporte de Asistencia Académica</h2>
+            <p><b>Materia:</b> {info['materia']}<br>
+            <b>Docente:</b> {info['profesor']}<br>
+            <b>Salón:</b> {info['salon']}<br>
+            <b>Fecha:</b> {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+            
+            <table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+                <tr style="background-color: #002B49; color: white;">
+                    <th>Estudiante</th>
+                    <th>Código</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                </tr>
+    """
+    for a in asistentes:
+        html += f"<tr><td>{a['full_name']}</td><td>{a['username']}</td><td>{a['timestamp']}</td><td>{a['status']}</td></tr>"
+    
+    html += "</table><p><i>Generado automáticamente por UNINPAHU Asistencia.</i></p></body></html>"
+    msg.attach(MIMEText(html, 'html'))
+    
+    # NOTA: Configura aquí tus credenciales SMTP reales
+    # try:
+    #     server = smtplib.SMTP('smtp.gmail.com', 587)
+    #     server.starttls()
+    #     server.login("tu_correo@gmail.com", "tu_password")
+    #     server.send_message(msg)
+    #     server.quit()
+    # except Exception as e:
+    #     print(f"Error enviando correo: {e}")
+    print(f"📧 SIMULACIÓN: Reporte enviado a {info['email']}")
 
 @attendance_bp.route('/horario/<username>', methods=['GET'])
 def get_horario(username):
