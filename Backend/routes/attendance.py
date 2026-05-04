@@ -260,7 +260,7 @@ def monitor_de_horarios(app_context):
     Si es así, dispara el auto-cierre y el envío de reporte por email.
     """
     with app_context:
-        print("🕒 Monitor de Horarios Iniciado (Auto-Cierre)")
+        print("Monitor de Horarios Iniciado (Auto-Cierre)")
         while True:
             try:
                 now = datetime.now()
@@ -280,7 +280,7 @@ def monitor_de_horarios(app_context):
                     expirados = conn.execute(query_expirados, (dia_actual, hora_actual)).fetchall()
                     
                     for row in expirados:
-                        print(f"⏰ Auto-Cierre ejecutado para horario ID: {row['schedule_id']}")
+                        print(f"Auto-Cierre ejecutado para horario ID: {row['schedule_id']}")
                         cerrar_sesion_y_reportar(conn, row['schedule_id'])
             except Exception as e:
                 print(f"Error en monitor: {e}")

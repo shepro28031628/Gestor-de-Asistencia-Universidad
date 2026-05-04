@@ -37,14 +37,14 @@ def restore_database():
     Borra la base de datos actual e inserta datos de prueba realistas.
     """
     db_path = 'Backend/asistencia.db'
-    print(f"🛠️ Restaurando base de datos en: {os.path.abspath(db_path)}")
+    print(f"Restaurando base de datos en: {os.path.abspath(db_path)}")
     
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Creación de tablas
     cursor.executescript(SCHEMA)
-    print("✅ Esquema creado.")
+    print("Esquema creado.")
 
     # --- DATOS DE PRUEBA: PROFESORES ---
     profesores = [
@@ -95,7 +95,7 @@ def restore_database():
 
     conn.commit()
     conn.close()
-    print("🚀 BASE DE DATOS RESTAURADA CON ÉXITO. Sistema listo para pruebas.")
+    print("BASE DE DATOS RESTAURADA CON EXITO. Sistema listo para pruebas.")
 
 if __name__ == '__main__':
     restore_database()
