@@ -34,20 +34,32 @@
 </div>
 
 <script>
+// Estado global del rol seleccionado (estudiante por defecto)
 let currentRole = 'estudiante';
+
+/**
+ * Cambia visualmente los botones de rol y actualiza la variable de estado.
+ */
 function setRole(role) {
     currentRole = role;
     const btnEst = document.getElementById('btn-estudiante');
     const btnProf = document.getElementById('btn-profesor');
     const active = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[#002B49] transition-all";
     const inactive = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-[#002B49] transition-all";
+    
+    // Aplicamos clases de estilo según el botón presionado
     btnEst.className = role === 'estudiante' ? active : inactive;
     btnProf.className = role === 'profesor' ? active : inactive;
 }
 
+/**
+ * Captura datos del formulario y realiza la petición de autenticación a la API.
+ */
 async function handleLogin() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
+    
+    // Validación básica de campos vacíos
     if (!username || !password) return showToast("Completa los datos", "warning");
 
     try {
@@ -56,11 +68,25 @@ async function handleLogin() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ username, password, role: currentRole })
         });
+        
         const data = await response.json();
         if (!response.ok) throw new Error(data.message);
-        localStorage.setItem('user', JSON.stringify({username: data.username, name: data.full_name, role: data.role, id: data.user_id}));
+        
+        // PERSISTENCIA: Guardamos los datos esenciales del usuario en LocalStorage para toda la sesión PWA
+        localStorage.setItem('user', JSON.stringify({
+            username: data.username, 
+            name: data.full_name, 
+            role: data.role, 
+            id: data.user_id,
+            profile_pic: data.profile_pic
+        }));
+        
+        // Redirección según el rol devuelto por el servidor
         window.location.href = data.role === 'profesor' ? '/profesor' : '/estudiante';
-    } catch (e) { showToast("Acceso denegado", "error"); }
+        
+    } catch (e) { 
+        showToast("Acceso denegado. Verifica tus credenciales.", "error"); 
+    }
 }
 </script>
 {% endblock %}

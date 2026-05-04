@@ -16,7 +16,12 @@
 4. Confirma el nombre y haz clic en **"Añadir"**.
 5. La aplicación aparecerá en tu iPhone como si fuera una app nativa.
 
+## 📡 Soporte Offline (Resiliencia)
+Gracias a la tecnología PWA, esta aplicación cuenta con **Modo Offline Inteligente**:
+- **Caché Estático**: Los logos, colores y fuentes funcionan sin internet.
+- **Cola de Sincronización**: Si marcas asistencia en un lugar sin señal (ej: sótanos), la aplicación guardará tu registro localmente y lo enviará al servidor automáticamente en cuanto detecte conexión WiFi o Datos.
+
 ## 🌟 Ventajas de instalar la PWA
 - **Acceso Rápido**: No tienes que escribir la URL cada vez.
 - **Pantalla Completa**: Se oculta la barra del navegador para una mejor experiencia.
-- **Rendimiento**: Carga mucho más rápido gracias al sistema de caché.
+- **Geolocalización Directa**: Acceso más fluido al GPS del dispositivo.

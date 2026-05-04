@@ -112,15 +112,17 @@
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
+// Recuperamos el objeto de usuario guardado en el Login
 const user = JSON.parse(localStorage.getItem('user'));
-if (!user) window.location.href = '/';
+if (!user) window.location.href = '/'; // Redirección si no hay sesión activa
 
+// Inicialización de la interfaz con datos del usuario
 document.getElementById('student-name').innerText = user.full_name || user.name;
 const nameParts = (user.full_name || user.name).split(' ');
 const initials = nameParts.map(n => n[0]).join('').substring(0,2).toUpperCase();
 document.getElementById('user-initials').innerText = initials;
 
-// CARGAR FOTO SI EXISTE
+// Lógica para mostrar la foto de perfil si el usuario la tiene cargada
 if (user.profile_pic) {
     const img = document.getElementById('profile-img');
     img.src = `http://localhost:5001${user.profile_pic}`;
@@ -128,6 +130,9 @@ if (user.profile_pic) {
     document.getElementById('user-initials').classList.add('hidden');
 }
 
+/**
+ * Sube una nueva foto de perfil y actualiza el LocalStorage para persistencia.
+ */
 async function uploadProfilePic(input) {
     if (!input.files[0]) return;
     const formData = new FormData();
@@ -143,11 +148,14 @@ async function uploadProfilePic(input) {
         if (data.success) {
             user.profile_pic = data.profile_pic;
             localStorage.setItem('user', JSON.stringify(user));
-            location.reload();
+            location.reload(); // Recarga para aplicar cambios visuales
         }
     } catch (e) { showToast("Error al subir foto", "error"); }
 }
 
+/**
+ * Sincroniza el horario del día y el progreso académico desde la API.
+ */
 async function sync() {
     try {
         const [rHorario, rProgreso] = await Promise.all([
@@ -160,21 +168,33 @@ async function sync() {
 }
 
 let html5QrCode = null;
+
+/**
+ * Inicia la cámara para el escaneo del código QR.
+ */
 async function startScanner() {
     document.getElementById('scanner-modal').classList.remove('hidden');
     html5QrCode = new Html5Qrcode("reader");
     try {
+        // Configuramos la cámara trasera con 15 fps para ahorro de batería
         await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 220 }, (text) => processScan(text));
     } catch (err) { stopScanner(); }
 }
 
+/**
+ * Detiene la cámara y libera recursos de hardware.
+ */
 async function stopScanner() {
     if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} html5QrCode = null; }
     document.getElementById('scanner-modal').classList.add('hidden');
 }
 
+/**
+ * Procesa el token obtenido del QR y captura las coordenadas GPS del estudiante.
+ */
 async function processScan(token) {
     stopScanner();
+    // Solicitamos permiso de ubicación al momento del escaneo
     navigator.geolocation.getCurrentPosition(async pos => {
         const payload = { token, student_id: user.id, lat: pos.coords.latitude, lng: pos.coords.longitude };
         try {
@@ -185,25 +205,32 @@ async function processScan(token) {
             });
             const d = await resp.json();
             showToast(d.message, d.success ? "success" : "error");
-            sync();
+            sync(); // Actualiza el progreso si fue exitoso
         } catch (e) { 
-            // PERSISTENCIA OFFLINE: Si falla la red, guardamos en cola
+            // COLA OFFLINE: Si no hay internet, guardamos el intento para después
             saveToOfflineQueue(payload);
             showToast("⚠️ Sin conexión. Registro guardado localmente.", "warning");
         }
+    }, (err) => {
+        showToast("Error GPS: Por favor activa tu ubicación", "error");
     });
 }
 
-// GESTIÓN DE COLA OFFLINE
+/**
+ * Almacena el marcado en LocalStorage para sincronización diferida.
+ */
 function saveToOfflineQueue(payload) {
     let queue = JSON.parse(localStorage.getItem('attendance_queue') || '[]');
-    // Evitar duplicados del mismo token en la cola
+    // Evitamos duplicar el mismo token en la cola local
     if (!queue.find(q => q.token === payload.token)) {
         queue.push({...payload, timestamp: new Date().toISOString()});
         localStorage.setItem('attendance_queue', JSON.stringify(queue));
     }
 }
 
+/**
+ * Intenta enviar todos los registros pendientes al servidor cuando vuelve el internet.
+ */
 async function syncOfflineQueue() {
     let queue = JSON.parse(localStorage.getItem('attendance_queue') || '[]');
     if (queue.length === 0) return;
@@ -216,10 +243,10 @@ async function syncOfflineQueue() {
                 body: JSON.stringify(queue[i])
             });
             if (resp.ok) {
-                queue.splice(i, 1);
+                queue.splice(i, 1); // Eliminamos de la cola si se envió con éxito
                 i--;
             }
-        } catch (e) { break; } // Seguir offline
+        } catch (e) { break; } // Detener si se pierde la red nuevamente
     }
     localStorage.setItem('attendance_queue', JSON.stringify(queue));
     if (queue.length === 0) {
@@ -228,10 +255,12 @@ async function syncOfflineQueue() {
     }
 }
 
-// Sondeo de Notificaciones Vivas y Validación de Asistencia (Cada 5 seg para interactividad)
+/**
+ * Sondeo periódico (Polling) para detectar clases recién activadas y citaciones.
+ */
 async function checkLiveSessions() {
     try {
-        // 1. Revisar si hay clases activas para alertar
+        // 1. Notificación visual de clases activas en tiempo real
         const resp = await fetch(`http://localhost:5001/api/attendance/sesiones-activas/${user.username}`);
         const data = await resp.json();
         const container = document.getElementById('live-notifications');
@@ -243,10 +272,9 @@ async function checkLiveSessions() {
             container.appendChild(toast);
         });
 
-        // 2. Sincronizar progreso si el profesor marcó manual o el QR funcionó
-        sync(); 
+        sync(); // Refresca el progreso académico
 
-        // 3. Revisar Citaciones
+        // 3. Revisar si el profesor generó una citación formal
         const rCit = await fetch(`http://localhost:5001/api/attendance/get-citaciones/${user.user_id || user.id}`);
         const cits = await rCit.json();
         cits.forEach(c => {
@@ -258,36 +286,7 @@ async function checkLiveSessions() {
     } catch (e) { }
 }
 
-function handleFile(input) {
-    const fileName = input.files[0] ? input.files[0].name : "Selecciona tu PDF o imagen aquí";
-    document.getElementById('file-name').innerText = fileName;
-}
-
-async function uploadJustification() {
-    const fileInput = document.getElementById('file-input');
-    const scheduleId = document.getElementById('subject-selector').value;
-    
-    if (!fileInput.files[0]) return showToast("Selecciona un archivo primero", "warning");
-    if (!scheduleId) return showToast("Selecciona la materia de la falta", "warning");
-
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-    formData.append('student_id', user.id);
-    formData.append('schedule_id', scheduleId);
-
-    try {
-        const resp = await fetch('http://localhost:5001/api/attendance/subir-justificacion', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await resp.json();
-        if (data.success) {
-            showToast("🚀 Soporte enviado con éxito", "success");
-            fileInput.value = "";
-            document.getElementById('file-name').innerText = "Selecciona tu PDF o imagen aquí";
-        }
-    } catch (e) { showToast("Error al subir archivo", "error"); }
-}
+// --- FUNCIONES DE RENDERIZADO (DOM) ---
 
 function renderProgress(data) {
     document.getElementById('progress-container').innerHTML = data.map(i => `
@@ -318,6 +317,9 @@ function switchTab(tab) {
     if (tab === 'historial') loadMyHistory();
 }
 
+/**
+ * Obtiene y muestra el historial personal de asistencias.
+ */
 async function loadMyHistory() {
     try {
         const resp = await fetch(`http://localhost:5001/api/attendance/historial`);
@@ -342,10 +344,12 @@ async function loadMyHistory() {
 }
 
 function logout() { localStorage.clear(); window.location.href = '/'; }
-sync();
-syncOfflineQueue();
-setInterval(checkLiveSessions, 5000);
-window.addEventListener('online', syncOfflineQueue);
-checkLiveSessions();
+
+// --- CICLO DE VIDA DE LA APP ---
+sync(); // Carga inicial
+syncOfflineQueue(); // Intenta limpiar la cola pendiente al arrancar
+setInterval(checkLiveSessions, 5000); // Polling cada 5 seg
+window.addEventListener('online', syncOfflineQueue); // Listener para reconexión
+checkLiveSessions(); 
 </script>
 {% endblock %}

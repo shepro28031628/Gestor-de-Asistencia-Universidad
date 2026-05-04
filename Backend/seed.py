@@ -1,7 +1,8 @@
 import sqlite3
 import os
 
-# 1. EL ESQUEMA (Directo aquí para evitar errores de importación)
+# ESQUEMA DE BASE DE DATOS (Sincronizado con models.py)
+# Se utiliza para resetear la base de datos a un estado inicial controlado.
 SCHEMA = '''
 DROP TABLE IF EXISTS justifications;
 DROP TABLE IF EXISTS citations;
@@ -17,7 +18,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS academic_programs;
 
 CREATE TABLE academic_programs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, code TEXT);
-CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, full_name TEXT, role TEXT, program_id INTEGER, profile_pic TEXT);
+CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, full_name TEXT, email TEXT, role TEXT, program_id INTEGER, profile_pic TEXT);
 CREATE TABLE campuses (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, latitude REAL, longitude REAL, radius_meters INTEGER);
 CREATE TABLE rooms (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT, campus_id INTEGER);
 CREATE TABLE subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT UNIQUE, name TEXT);
@@ -31,51 +32,58 @@ CREATE TABLE justifications (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id IN
 '''
 
 def restore_database():
+    """
+    Función de utilidad para desarrolladores. 
+    Borra la base de datos actual e inserta datos de prueba realistas.
+    """
     db_path = 'Backend/asistencia.db'
     print(f"🛠️ Restaurando base de datos en: {os.path.abspath(db_path)}")
     
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Ejecutar esquema
+    # Creación de tablas
     cursor.executescript(SCHEMA)
     print("✅ Esquema creado.")
 
-    # 2. INSERTAR PROFESORES
+    # --- DATOS DE PRUEBA: PROFESORES ---
     profesores = [
-        ('elfar_morantes', '123', 'ELFAR DIDIER MORANTES SANCHEZ', 'profesor'),
-        ('dakar_sarmiento', '123', 'DAKAR SARMIENTO', 'profesor')
+        ('elfar_morantes', '123', 'ELFAR DIDIER MORANTES SANCHEZ', 'profesor', 'elfar.morantes@uninpahu.edu.co'),
+        ('dakar_sarmiento', '123', 'DAKAR SARMIENTO', 'profesor', 'dakar.sarmiento@uninpahu.edu.co')
     ]
-    cursor.executemany("INSERT INTO users (username, password, full_name, role) VALUES (?,?,?,?)", profesores)
+    cursor.executemany("INSERT INTO users (username, password, full_name, role, email) VALUES (?,?,?,?,?)", profesores)
     
-    # 3. INSERTAR MATERIAS Y GRUPOS (Datos de Ulises)
-    # Machine Learning (Sabatino)
+    # --- DATOS DE PRUEBA: SEDES Y SALONES ---
+    cursor.execute("INSERT INTO campuses (name, latitude, longitude, radius_meters) VALUES ('Sede Principal UNINPAHU', 4.6300, -74.0700, 200)")
+    cursor.execute("INSERT INTO rooms (code, campus_id) VALUES ('LAB-301', 1)")
+    
+    # --- DATOS DE PRUEBA: MATERIAS Y GRUPOS ---
+    # Machine Learning
     cursor.execute("INSERT INTO subjects (code, name) VALUES ('IS1791', 'MACHINE LEARNING Y DEEP LEARNING')")
     sub_ml = cursor.lastrowid
     cursor.execute("INSERT INTO groups (group_number, subject_id, teacher_id, start_date, end_date, jornada) VALUES ('750', ?, 1, '2026-02-02', '2026-05-30', 'Sabatino')", (sub_ml,))
     group_ml = cursor.lastrowid
 
-    # Videojuegos (Diurno)
+    # Videojuegos
     cursor.execute("INSERT INTO subjects (code, name) VALUES ('IS1792', 'DESARROLLO DE VIDEOJUEGOS')")
     sub_vg = cursor.lastrowid
     cursor.execute("INSERT INTO groups (group_number, subject_id, teacher_id, start_date, end_date, jornada) VALUES ('750', ?, 2, '2026-02-02', '2026-05-30', 'Diurno')", (sub_vg,))
     group_vg = cursor.lastrowid
 
-    # 4. INSERTAR HORARIOS
-    # Sábados para Machine Learning (2 sesiones)
-    cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'S', '07:00', '10:00')", (group_ml,))
-    cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'S', '17:00', '19:00')", (group_ml,))
-    # Miércoles para Videojuegos
+    # --- DATOS DE PRUEBA: HORARIOS ---
+    # Sábados
+    cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'S', '07:00', '23:59')", (group_ml,))
+    # Miércoles
     cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'W', '14:15', '17:15')", (group_vg,))
 
-    # 5. INSERTAR ESTUDIANTES
+    # --- DATOS DE PRUEBA: ESTUDIANTES ---
     estudiantes = [
         ('202518003330', '123', 'ESTUDIANTE MASTER', 'estudiante'),
         ('2025100001', '123', 'OLIVIA FLORES', 'estudiante')
     ]
     cursor.executemany("INSERT INTO users (username, password, full_name, role) VALUES (?,?,?,?)", estudiantes)
     
-    # Inscribir a los estudiantes en las materias
+    # Inscripción masiva de estudiantes en grupos
     cursor.execute("SELECT id FROM users WHERE role='estudiante'")
     student_ids = [s[0] for s in cursor.fetchall()]
     cursor.execute("SELECT id FROM groups")
@@ -87,7 +95,7 @@ def restore_database():
 
     conn.commit()
     conn.close()
-    print("🚀 BASE DE DATOS RESTAURADA CON ÉXITO. Ya puedes iniciar sesión.")
+    print("🚀 BASE DE DATOS RESTAURADA CON ÉXITO. Sistema listo para pruebas.")
 
 if __name__ == '__main__':
     restore_database()

@@ -12,7 +12,11 @@ from database import get_db
 attendance_bp = Blueprint('attendance', __name__)
 
 def haversine_distance(lat1, lon1, lat2, lon2):
-    R = 6371000
+    """
+    Calcula la distancia en metros entre dos puntos geográficos (Lat/Lng)
+    utilizando la fórmula de Haversine. Crucial para la geocerca.
+    """
+    R = 6371000 # Radio de la Tierra en metros
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlambda = math.radians(lon2 - lon1)
@@ -20,12 +24,18 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
 def get_dia_code(date_obj):
+    """Convierte el día de la semana de Python al formato de la DB (M, T, W, R, F, S, U)"""
     mapping = {0: "M", 1: "T", 2: "W", 3: "R", 4: "F", 5: "S", 6: "U"}
     return mapping.get(date_obj.weekday())
 
 @attendance_bp.route('/progreso/<username>', methods=['GET'])
 def get_progreso_estudiante(username):
+    """
+    Calcula el porcentaje de asistencia del alumno basándose en las semanas 
+    transcurridas y las clases que debió haber tenido.
+    """
     with get_db() as conn:
+        # Consulta que cruza inscripciones, grupos y asistencias registradas
         query = '''
             SELECT s.name as materia, g.start_date, g.end_date, g.id as group_id,
             (SELECT COUNT(*) FROM schedules WHERE group_id = g.id) as sesiones_semanales,
@@ -44,12 +54,14 @@ def get_progreso_estudiante(username):
         progreso = []
         for r in results:
             try:
+                # Cálculo matemático de clases esperadas vs reales
                 start = datetime.strptime(r['start_date'], "%Y-%m-%d")
                 end = datetime.strptime(r['end_date'], "%Y-%m-%d")
                 semanas = max(1, math.ceil((end - start).days / 7))
                 total_esperado = max(1, semanas * r['sesiones_semanales'])
                 porcentaje = int((r['asistencias'] / total_esperado) * 100)
             except:
+                # Valores por defecto en caso de datos de fecha corruptos
                 total_esperado, porcentaje, semanas = 16, 0, 16
             progreso.append({"materia": r['materia'], "porcentaje": min(100, porcentaje), "asistencias": r['asistencias'], "total": total_esperado, "semanas": semanas})
         return jsonify(progreso)
@@ -77,36 +89,54 @@ def get_historial():
 
 @attendance_bp.route('/marcar', methods=['POST'])
 def marcar_asistencia():
+    """
+    Endpoint principal para estudiantes. Valida:
+    1. Token QR activo. 2. Horario de clase. 3. Ubicación GPS. 4. Unicidad.
+    """
     data = request.json
     with get_db() as conn:
+        # Recuperamos la sesión y los parámetros de ubicación de la sede
         session = conn.execute('SELECT cs.id, c.latitude, c.longitude, c.radius_meters, cs.expires_at, sch.day FROM class_sessions cs JOIN schedules sch ON cs.schedule_id = sch.id JOIN rooms r ON sch.room_id = r.id JOIN campuses c ON r.campus_id = c.id WHERE cs.qr_token = ? AND cs.is_active = 1', (data.get('token'),)).fetchone()
+        
         if not session: return jsonify({"success": False, "message": "QR inválido"}), 400
+        
+        # Validación de Tiempo y Día
         now = datetime.now()
         if session['day'] != get_dia_code(now) or now > datetime.fromisoformat(session['expires_at']):
             return jsonify({"success": False, "message": "QR fuera de tiempo o día"}), 403
+        
+        # GEOFENCING: Validación de ubicación física
         distancia = haversine_distance(data.get('lat'), data.get('lng'), session['latitude'], session['longitude'])
         if distancia > session['radius_meters'] and session['latitude'] != 0:
             return jsonify({"success": False, "message": "Fuera de rango"}), 403
+            
         try:
+            # Registro oficial en la base de datos
             conn.execute('INSERT INTO attendances (student_id, session_id, lat, lng, distance_to_campus) VALUES (?, ?, ?, ?, ?)', 
                          (data.get('student_id'), session['id'], data.get('lat'), data.get('lng'), distancia))
             conn.commit()
             return jsonify({"success": True, "message": "Asistencia exitosa"})
-        except: return jsonify({"success": False, "message": "Ya marcaste asistencia"}), 500
+        except: 
+            # Evita duplicados (Un estudiante no puede marcar dos veces la misma sesión)
+            return jsonify({"success": False, "message": "Ya marcaste asistencia"}), 500
 
 @attendance_bp.route('/activar', methods=['POST'])
 def activar_clase():
+    """
+    Activa manualmente una sesión de clase. 
+    Invalida tokens previos para asegurar que solo el nuevo sea válido.
+    """
     data = request.json
     now = datetime.now()
     schedule_id = data.get('schedule_id')
     
     with get_db() as conn:
-        # DINAMISMO: Invalidamos cualquier sesión activa previa para este horario hoy
+        # SEGURIDAD: Desactivamos tokens anteriores del mismo horario para evitar fraude
         conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ? AND is_active = 1', (schedule_id,))
         
-        # Generamos un token totalmente nuevo y único
+        # Generación de identificador único (UUID)
         token = str(uuid.uuid4())
-        expires_at = (now + timedelta(minutes=15)).isoformat()
+        expires_at = (now + timedelta(minutes=15)).isoformat() # Ventana de 15 min de validez
         
         conn.execute('INSERT INTO class_sessions (schedule_id, qr_token, expires_at, is_active) VALUES (?, ?, ?, 1)', 
                     (schedule_id, token, expires_at))
@@ -120,21 +150,24 @@ def activar_clase():
 
 @attendance_bp.route('/token-vivo/<schedule_id>', methods=['GET'])
 def get_token_vivo(schedule_id):
-    """Genera o recupera el token actual, rotándolo cada 15 segundos."""
+    """
+    Implementa la ROTACIÓN VIVA: Genera un nuevo token cada 15 segundos
+    pero mantiene válidos los anteriores por 60 segundos (Ventana de Gracia).
+    """
     now = datetime.now()
     with get_db() as conn:
-        # 1. Limpieza: Inactivar tokens con más de 60 segundos de antigüedad (Margen de gracia)
+        # 1. LIMPIEZA: Solo desactivamos tokens que tengan más de 1 minuto (Margen para el estudiante)
         limite_gracia = (now - timedelta(seconds=60)).strftime("%Y-%m-%d %H:%M:%S")
         conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ? AND created_at < ? AND is_active = 1', (schedule_id, limite_gracia))
         
-        # 2. Buscar el token más reciente generado en los últimos 15 segundos
+        # 2. ROTACIÓN: Buscamos si ya se generó uno en los últimos 15 segundos
         limite_rotacion = (now - timedelta(seconds=15)).strftime("%Y-%m-%d %H:%M:%S")
         reciente = conn.execute('SELECT qr_token FROM class_sessions WHERE schedule_id = ? AND created_at >= ? AND is_active = 1 ORDER BY created_at DESC', (schedule_id, limite_rotacion)).fetchone()
         
         if reciente:
             return jsonify({"token": reciente['qr_token']})
         
-        # 3. Si no hay uno reciente, generar nuevo
+        # 3. Si no hay token fresco, creamos el siguiente eslabón de la cadena
         nuevo_token = str(uuid.uuid4())
         expires_at = (now + timedelta(minutes=15)).isoformat()
         conn.execute('INSERT INTO class_sessions (schedule_id, qr_token, expires_at, is_active) VALUES (?, ?, ?, 1)', (schedule_id, nuevo_token, expires_at))
@@ -221,7 +254,11 @@ def cerrar_sesion_y_reportar(conn, schedule_id):
         enviar_reporte_email(info, asistentes)
 
 def monitor_de_horarios(app_context):
-    """Hilo secundario que cierra clases automáticamente al finalizar el bloque horario."""
+    """
+    PROCESO EN SEGUNDO PLANO (THREAD):
+    Verifica cada minuto si alguna clase activa ya llegó a su hora de fin.
+    Si es así, dispara el auto-cierre y el envío de reporte por email.
+    """
     with app_context:
         print("🕒 Monitor de Horarios Iniciado (Auto-Cierre)")
         while True:
@@ -231,7 +268,7 @@ def monitor_de_horarios(app_context):
                 dia_actual = get_dia_code(now)
                 
                 with get_db() as conn:
-                    # Buscamos sesiones activas cuyo horario ya terminó hoy
+                    # Buscamos sesiones cuya hora de fin (end_time) sea menor o igual a la actual
                     query_expirados = '''
                         SELECT cs.schedule_id 
                         FROM class_sessions cs
@@ -247,19 +284,23 @@ def monitor_de_horarios(app_context):
                         cerrar_sesion_y_reportar(conn, row['schedule_id'])
             except Exception as e:
                 print(f"Error en monitor: {e}")
-            time.sleep(60) # Verificar cada minuto
+            time.sleep(60) # Pausa de 1 minuto entre verificaciones
 
-# Función para arrancar el monitor desde app.py o al registrar el blueprint
 def iniciar_monitor(app):
+    """Lanzador del hilo daemon para el monitor."""
     threading.Thread(target=monitor_de_horarios, args=(app.app_context(),), daemon=True).start()
 
 def enviar_reporte_email(info, asistentes):
-    """Lógica de envío de correo SMTP."""
+    """
+    Genera un cuerpo HTML con la tabla de asistentes y lo envía 
+    al correo electrónico del profesor mediante SMTP.
+    """
     msg = MIMEMultipart()
     msg['From'] = "sistema.asistencia@uninpahu.edu.co"
     msg['To'] = info['email']
     msg['Subject'] = f"Reporte de Asistencia: {info['materia']} - {datetime.now().strftime('%d/%m/%Y')}"
     
+    # Construcción dinámica de la tabla HTML
     html = f"""
     <html>
         <body style="font-family: sans-serif; color: #002B49;">
@@ -283,11 +324,11 @@ def enviar_reporte_email(info, asistentes):
     html += "</table><p><i>Generado automáticamente por UNINPAHU Asistencia.</i></p></body></html>"
     msg.attach(MIMEText(html, 'html'))
     
-    # NOTA: Configura aquí tus credenciales SMTP reales
+    # NOTA: Para habilitar el envío real, descomenta y configura las líneas de abajo
     # try:
     #     server = smtplib.SMTP('smtp.gmail.com', 587)
     #     server.starttls()
-    #     server.login("tu_correo@gmail.com", "tu_password")
+    #     server.login("tu_correo@gmail.com", "TU_APP_PASSWORD")
     #     server.send_message(msg)
     #     server.quit()
     # except Exception as e:

@@ -139,6 +139,9 @@ let pollInterval = null;
 
 async function init() { await loadHorario(); }
 
+/**
+ * Carga las materias que el profesor dicta hoy.
+ */
 async function loadHorario() {
     try {
         const resp = await fetch(`http://localhost:5001/api/attendance/horario/${user.username}`);
@@ -149,6 +152,9 @@ async function loadHorario() {
     } catch (e) {}
 }
 
+/**
+ * Activa la sesión de clase, genera el QR inicial y comienza el monitoreo en vivo.
+ */
 async function activar() {
     const sid = document.getElementById('subject-selector').value;
     if(!sid) return showToast("Selecciona materia", "warning");
@@ -160,16 +166,24 @@ async function activar() {
             body: JSON.stringify({ schedule_id: sid })
         });
         const data = await resp.json();
+        
+        // Cambio de UI para mostrar el QR y la lista de asistencia
         document.getElementById('qr-container').classList.remove('hidden');
         document.getElementById('btn-activar').classList.add('hidden');
         document.getElementById('real-time-panel').classList.remove('hidden');
+        
+        // Generación física del QR
         document.getElementById('qrcode').innerHTML = "";
         new QRCode(document.getElementById('qrcode'), { text: data.token, width: 200, height: 200 });
-        startPolling();
+        
+        startPolling(); // Inicia el ciclo de actualización
         showToast("🚀 Sesión Activa", "success");
     } catch (e) { }
 }
 
+/**
+ * Finaliza la clase manualmente y dispara el envío del reporte por email.
+ */
 async function finalizar() {
     if (!confirm("¿Deseas cerrar la asistencia y enviar el reporte por correo?")) return;
     try {
@@ -181,6 +195,7 @@ async function finalizar() {
         const d = await resp.json();
         if (d.success) {
             showToast(d.message, "success");
+            // Limpieza de estados y retorno a la vista inicial
             if (pollInterval) clearInterval(pollInterval);
             document.getElementById('qr-container').classList.add('hidden');
             document.getElementById('real-time-panel').classList.add('hidden');
@@ -215,6 +230,9 @@ async function updateQRCode() {
     } catch (e) {}
 }
 
+/**
+ * Recupera la lista de todos los estudiantes inscritos y resalta los presentes.
+ */
 async function updateLiveList() {
     if (!activeScheduleId) return;
     try {
@@ -222,14 +240,15 @@ async function updateLiveList() {
         const students = await resp.json();
         const present = students.filter(s => s.asistio > 0).length;
         
+        // Animación visual del contador
         const counterEl = document.getElementById('counter');
-        // Si el número cambia, hacemos un pequeño pulso en el contador
         if (counterEl.innerText !== `${present}/${students.length}`) {
             counterEl.classList.add('scale-125', 'bg-emerald-500');
             setTimeout(() => counterEl.classList.remove('scale-125', 'bg-emerald-500'), 1000);
         }
         counterEl.innerText = `${present}/${students.length}`;
         
+        // Renderizado de tarjetas de estudiantes
         document.getElementById('live-student-list').innerHTML = students.map(s => `
             <div class="flex items-center justify-between p-3 rounded-xl ${s.asistio ? 'bg-emerald-50 border border-emerald-100 animate-in fade-in zoom-in-95' : 'bg-slate-50'} transition-all duration-500">
                 <div class="flex items-center gap-3">
@@ -251,6 +270,9 @@ async function updateLiveList() {
     } catch (e) {}
 }
 
+/**
+ * Permite al profesor marcar a un estudiante que no pudo escanear el QR.
+ */
 async function marcarManual(studentId) {
     try {
         const resp = await fetch('http://localhost:5001/api/attendance/marcar-manual', {
