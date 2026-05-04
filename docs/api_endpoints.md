@@ -56,8 +56,17 @@ Calcula el porcentaje de asistencia acumulado por materia para el estudiante.
 ### 11. `POST /subir-justificacion`
 (Estudiante) Carga soporte PDF/JPG para inasistencias pasadas.
 
-### 12. `POST /crear-citacion`
+### 12. `GET /get-justificaciones-docente`
+(Docente) Lista todas las justificaciones enviadas por los estudiantes para su revisión.
+
+### 13. `GET /historial-docente/<username>`
+(Docente) Resumen histórico de todas las sesiones de clase dictadas por el profesor, con estadísticas de asistencia.
+
+### 14. `POST /crear-citacion`
 (Docente) Alerta formal para estudiantes con asistencia crítica (<80%).
+
+### 15. `GET /get-citaciones/<student_id>`
+(Estudiante) Consulta si el profesor ha generado alguna citación pendiente para el alumno.
 
 ---
 

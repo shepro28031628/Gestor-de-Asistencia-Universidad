@@ -473,6 +473,9 @@ def get_justificaciones_docente():
             JOIN subjects sub ON g.subject_id = sub.id
             ORDER BY j.timestamp DESC
         '''
+        rows = conn.execute(query).fetchall()
+        return jsonify([dict(row) for row in rows])
+
 @attendance_bp.route('/historial-docente/<username>', methods=['GET'])
 def get_historial_docente(username):
     """Obtiene el resumen de sesiones pasadas del profesor con conteo de asistencia."""
@@ -489,6 +492,8 @@ def get_historial_docente(username):
             WHERE u.username = ?
             ORDER BY cs.created_at DESC
         '''
+        rows = conn.execute(query, (username,)).fetchall()
+        return jsonify([dict(row) for row in rows])
 @attendance_bp.route('/crear-citacion', methods=['POST'])
 def crear_citacion():
     """Registra una nueva citación para un estudiante en riesgo."""

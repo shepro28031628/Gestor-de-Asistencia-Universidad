@@ -39,6 +39,21 @@ Bienvenido al sistema de asistencia. Esta guía te ayudará a navegar por las fu
 
 ---
 
-## ⚠️ Recomendaciones Generales
-- **Permisos**: La aplicación requiere acceso a la **Cámara** y a la **Ubicación GPS** para funcionar correctamente.
-- **Conectividad**: Si pierdes internet momentáneamente, no te preocupes; la app guardará tu registro y lo enviará cuando recuperes señal.
+## ⚙️ Administración y Despliegue
+Para personal de TI o administradores del sistema:
+
+### 1. Inicialización de Datos
+Para restaurar la base de datos a su estado original con sedes y usuarios de prueba:
+```bash
+python Backend/seed.py
+```
+
+### 2. Lanzamiento del Servidor
+El sistema está unificado. No requiere servidores front-end separados:
+```bash
+python Backend/app.py
+```
+Acceso local: `http://localhost:5001`
+
+### 3. Monitoreo
+- Verifica que la consola muestre **"Monitor de Horarios Iniciado"**. Este proceso es el que garantiza los cierres automáticos.

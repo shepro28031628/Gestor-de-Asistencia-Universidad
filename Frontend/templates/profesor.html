@@ -109,7 +109,7 @@ document.getElementById('user-initials').innerText = initials;
 // CARGAR FOTO SI EXISTE
 if (user.profile_pic) {
     const img = document.getElementById('profile-img');
-    img.src = `http://localhost:5001${user.profile_pic}`;
+    img.src = `${user.profile_pic}`;
     img.classList.remove('hidden');
     document.getElementById('user-initials').classList.add('hidden');
 }
@@ -121,7 +121,7 @@ async function uploadProfilePic(input) {
     formData.append('user_id', user.user_id || user.id);
 
     try {
-        const resp = await fetch('http://localhost:5001/api/auth/update-profile-pic', {
+        const resp = await fetch('/api/auth/update-profile-pic', {
             method: 'POST',
             body: formData
         });
@@ -144,7 +144,7 @@ async function init() { await loadHorario(); }
  */
 async function loadHorario() {
     try {
-        const resp = await fetch(`http://localhost:5001/api/attendance/horario/${user.username}`);
+        const resp = await fetch(`/api/attendance/horario/${user.username}`);
         const data = await resp.json();
         const day = ['U', 'M', 'T', 'W', 'R', 'F', 'S'][new Date().getDay()];
         const hoy = data.filter(m => m.day === day);
@@ -160,7 +160,7 @@ async function activar() {
     if(!sid) return showToast("Selecciona materia", "warning");
     activeScheduleId = sid;
     try {
-        const resp = await fetch('http://localhost:5001/api/attendance/activar', {
+        const resp = await fetch('/api/attendance/activar', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ schedule_id: sid })
@@ -187,7 +187,7 @@ async function activar() {
 async function finalizar() {
     if (!confirm("¿Deseas cerrar la asistencia y enviar el reporte por correo?")) return;
     try {
-        const resp = await fetch('http://localhost:5001/api/attendance/finalizar', {
+        const resp = await fetch('/api/attendance/finalizar', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ schedule_id: activeScheduleId })
@@ -218,7 +218,7 @@ function startPolling() {
 async function updateQRCode() {
     if (!activeScheduleId) return;
     try {
-        const resp = await fetch(`http://localhost:5001/api/attendance/token-vivo/${activeScheduleId}`);
+        const resp = await fetch(`/api/attendance/token-vivo/${activeScheduleId}`);
         const data = await resp.json();
         const qrContainer = document.getElementById('qrcode');
         // Solo regeneramos si el token cambió para evitar parpadeos innecesarios
@@ -236,7 +236,7 @@ async function updateQRCode() {
 async function updateLiveList() {
     if (!activeScheduleId) return;
     try {
-        const resp = await fetch(`http://localhost:5001/api/attendance/estudiantes-sesion/${activeScheduleId}`);
+        const resp = await fetch(`/api/attendance/estudiantes-sesion/${activeScheduleId}`);
         const students = await resp.json();
         const present = students.filter(s => s.asistio > 0).length;
         
@@ -275,7 +275,7 @@ async function updateLiveList() {
  */
 async function marcarManual(studentId) {
     try {
-        const resp = await fetch('http://localhost:5001/api/attendance/marcar-manual', {
+        const resp = await fetch('/api/attendance/marcar-manual', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ student_id: studentId, schedule_id: activeScheduleId })
@@ -287,7 +287,7 @@ async function marcarManual(studentId) {
 
 async function loadJustificaciones() {
     try {
-        const resp = await fetch('http://localhost:5001/api/attendance/get-justificaciones-docente');
+        const resp = await fetch('/api/attendance/get-justificaciones-docente');
         const data = await resp.json();
         document.getElementById('excuses-list').innerHTML = data.length ? data.map(j => `
             <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex justify-between items-center animate-in slide-in-from-right">
@@ -313,7 +313,7 @@ function switchTab(tab) {
 
 async function loadHistorial() {
     try {
-        const resp = await fetch(`http://localhost:5001/api/attendance/historial-docente/${user.username}`);
+        const resp = await fetch(`/api/attendance/historial-docente/${user.username}`);
         const data = await resp.json();
         document.getElementById('history-list').innerHTML = data.length ? data.map(h => {
             const perc = (h.presentes / h.inscritos) * 100 || 0;
@@ -339,7 +339,7 @@ async function loadHistorial() {
 
 async function crearCitacion(studentId) {
     try {
-        const resp = await fetch('http://localhost:5001/api/attendance/crear-citacion', {
+        const resp = await fetch('/api/attendance/crear-citacion', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ teacher_id: user.user_id || user.id, student_id: studentId })
@@ -360,7 +360,7 @@ async function loadAlertas() {
         </div>`;
 }
 
-function logout() { localStorage.clear(); window.location.href = '/'; }
+function logout() { localStorage.clear(); window.location.href = '/logout'; }
 init();
 </script>
 {% endblock %}

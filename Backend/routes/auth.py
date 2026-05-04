@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from database import get_db
 import os
 from werkzeug.utils import secure_filename
@@ -29,6 +29,13 @@ def login():
 
         if user:
             user_data = dict(user)
+            # Establecer sesión de servidor para acceso a rutas protegidas
+            session['logged_in'] = True
+            session['user_id'] = user_data['id']
+            session['role'] = user_data['role']
+            session['username'] = user_data['username']
+            session['full_name'] = user_data['full_name']
+
             return jsonify({
                 "success": True,
                 "user_id": user_data['id'],

@@ -125,7 +125,7 @@ document.getElementById('user-initials').innerText = initials;
 // Lógica para mostrar la foto de perfil si el usuario la tiene cargada
 if (user.profile_pic) {
     const img = document.getElementById('profile-img');
-    img.src = `http://localhost:5001${user.profile_pic}`;
+    img.src = `${user.profile_pic}`;
     img.classList.remove('hidden');
     document.getElementById('user-initials').classList.add('hidden');
 }
@@ -140,7 +140,7 @@ async function uploadProfilePic(input) {
     formData.append('user_id', user.user_id || user.id);
 
     try {
-        const resp = await fetch('http://localhost:5001/api/auth/update-profile-pic', {
+        const resp = await fetch('/api/auth/update-profile-pic', {
             method: 'POST',
             body: formData
         });
@@ -159,8 +159,8 @@ async function uploadProfilePic(input) {
 async function sync() {
     try {
         const [rHorario, rProgreso] = await Promise.all([
-            fetch(`http://localhost:5001/api/attendance/horario/${user.username}`),
-            fetch(`http://localhost:5001/api/attendance/progreso/${user.username}`)
+            fetch(`/api/attendance/horario/${user.username}`),
+            fetch(`/api/attendance/progreso/${user.username}`)
         ]);
         renderProgress(await rProgreso.json());
         renderSelector(await rHorario.json());
@@ -198,7 +198,7 @@ async function processScan(token) {
     navigator.geolocation.getCurrentPosition(async pos => {
         const payload = { token, student_id: user.id, lat: pos.coords.latitude, lng: pos.coords.longitude };
         try {
-            const resp = await fetch('http://localhost:5001/api/attendance/marcar', {
+            const resp = await fetch('/api/attendance/marcar', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -237,7 +237,7 @@ async function syncOfflineQueue() {
 
     for (let i = 0; i < queue.length; i++) {
         try {
-            const resp = await fetch('http://localhost:5001/api/attendance/marcar', {
+            const resp = await fetch('/api/attendance/marcar', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(queue[i])
@@ -261,7 +261,7 @@ async function syncOfflineQueue() {
 async function checkLiveSessions() {
     try {
         // 1. Notificación visual de clases activas en tiempo real
-        const resp = await fetch(`http://localhost:5001/api/attendance/sesiones-activas/${user.username}`);
+        const resp = await fetch(`/api/attendance/sesiones-activas/${user.username}`);
         const data = await resp.json();
         const container = document.getElementById('live-notifications');
         container.innerHTML = '';
@@ -275,7 +275,7 @@ async function checkLiveSessions() {
         sync(); // Refresca el progreso académico
 
         // 3. Revisar si el profesor generó una citación formal
-        const rCit = await fetch(`http://localhost:5001/api/attendance/get-citaciones/${user.user_id || user.id}`);
+        const rCit = await fetch(`/api/attendance/get-citaciones/${user.user_id || user.id}`);
         const cits = await rCit.json();
         cits.forEach(c => {
             const alert = document.createElement('div');
@@ -322,7 +322,7 @@ function switchTab(tab) {
  */
 async function loadMyHistory() {
     try {
-        const resp = await fetch(`http://localhost:5001/api/attendance/historial`);
+        const resp = await fetch(`/api/attendance/historial`);
         const data = await resp.json();
         const mine = data.filter(h => h.student_name === (user.full_name || user.name));
         document.getElementById('student-history').innerHTML = mine.length ? mine.map(h => `
@@ -343,7 +343,7 @@ async function loadMyHistory() {
     } catch (e) { }
 }
 
-function logout() { localStorage.clear(); window.location.href = '/'; }
+function logout() { localStorage.clear(); window.location.href = '/logout'; }
 
 // --- CICLO DE VIDA DE LA APP ---
 sync(); // Carga inicial
