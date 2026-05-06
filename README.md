@@ -4,8 +4,6 @@
 
 **UNINPAHU Asistencia** es una solución integral de software diseñada para optimizar y asegurar el registro de asistencia en el entorno universitario de UNINPAHU, contribuyendo a una mejor gestión académica y la interacción entre docentes y estudiantes.
 
----
-
 ## 🌟 Visión General
 El proyecto transforma el proceso tradicional de llamado a lista en una interacción digital dinámica. Los profesores generan sesiones de clase protegidas por **geolocalización** y **tokens de rotación viva**, asegurando que el registro sea imposible de falsificar mediante fotografías compartidas.
 
