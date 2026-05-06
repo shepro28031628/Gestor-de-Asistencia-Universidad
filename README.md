@@ -44,8 +44,6 @@ graph TD
     D -->|Auto-Cierre| E[Reporte Email SMTP]
     B -->|SQL WAL Mode| F[(SQLite DB)]
 
----
-
 ## 📦 Estructura del Proyecto
 - **/Backend**: Rutas API, lógica de seguridad y el `monitor_de_horarios`.
 - **/Frontend**: Plantillas PWA y activos estáticos optimizados.
