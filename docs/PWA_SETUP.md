@@ -1,27 +1,50 @@
-# Guía de Instalación PWA (Móvil) 📱✨
+# 📱 Guía de Instalación PWA
+> **Experiencia Nativa** | **Sin Descargas** | **Soporte Offline**
 
-**UNINPAHU Asistencia** es una Aplicación Web Progresiva. Esto significa que puedes instalarla en tu celular sin necesidad de descargarla de la Play Store o App Store.
+**UNINPAHU Asistencia** utiliza tecnología *Progressive Web App* para ofrecerte la velocidad de una aplicación móvil con la ligereza de una web. Instálala en segundos siguiendo estos pasos.
 
-## 🤖 En Android (Google Chrome)
-1. Abre el navegador Chrome y entra a la URL de la aplicación.
-2. Espera unos segundos y aparecerá un aviso en la parte inferior: **"Agregar a la pantalla de inicio"**.
-3. Si no aparece, haz clic en los **tres puntos (⋮)** de la esquina superior derecha.
-4. Selecciona la opción **"Instalar aplicación"** o **"Agregar a la pantalla de inicio"**.
-5. ¡Listo! Ahora aparecerá el logo de UNINPAHU en tu menú de aplicaciones.
+---
 
-## 🍎 En iPhone / iOS (Safari)
-1. Abre el navegador Safari y entra a la URL de la aplicación.
-2. Haz clic en el botón de **"Compartir"** (el cuadrado con la flecha hacia arriba en la parte inferior).
-3. Desliza hacia arriba hasta encontrar la opción **"Agregar a inicio"** o **"Añadir a pantalla de inicio"**.
-4. Confirma el nombre y haz clic en **"Añadir"**.
-5. La aplicación aparecerá en tu iPhone como si fuera una app nativa.
+## 🤖 Instalación en Android (Chrome)
 
-## 📡 Soporte Offline (Resiliencia)
-Gracias a la tecnología PWA, esta aplicación cuenta con **Modo Offline Inteligente**:
-- **Caché Estático**: Los logos, colores y fuentes funcionan sin internet.
-- **Cola de Sincronización**: Si marcas asistencia en un lugar sin señal (ej: sótanos), la aplicación guardará tu registro localmente y lo enviará al servidor automáticamente en cuanto detecte conexión WiFi o Datos.
+> [!TIP]
+> Chrome detectará automáticamente que la app es instalable. Busca el banner en la parte inferior al ingresar por primera vez.
 
-## 🌟 Ventajas de instalar la PWA
-- **Acceso Rápido**: No tienes que escribir la URL cada vez.
-- **Pantalla Completa**: Se oculta la barra del navegador para una mejor experiencia.
-- **Geolocalización Directa**: Acceso más fluido al GPS del dispositivo.
+1.  **Ingresar**: Abre Chrome y navega a la URL institucional.
+2.  **Menú**: Toca los **tres puntos (⋮)** en la esquina superior derecha.
+3.  **Instalar**: Selecciona **"Instalar aplicación"** o **"Agregar a pantalla de inicio"**.
+4.  **Confirmar**: Acepta el nombre predeterminado y el icono aparecerá en tu menú de aplicaciones.
+
+---
+
+## 🍎 Instalación en iPhone / iOS (Safari)
+
+> [!IMPORTANT]
+> Apple requiere el uso de **Safari** para poder habilitar las funciones de PWA e instalación en el inicio.
+
+1.  **Ingresar**: Abre Safari y navega a la URL de asistencia.
+2.  **Compartir**: Toca el icono de **"Compartir"** (cuadrado con flecha hacia arriba) en la barra inferior.
+3.  **Añadir**: Desliza hacia arriba y selecciona **"Agregar a inicio"**.
+4.  **Finalizar**: Toca **"Añadir"** en la esquina superior derecha. La app se comportará como una aplicación nativa.
+
+---
+
+## 📡 Resiliencia y Modo Offline
+
+Nuestra PWA está diseñada para el entorno universitario real, donde la señal puede ser inestable en salones específicos o sótanos.
+
+*   **⚡ Carga Instantánea**: Los recursos visuales (logos, CSS, JS) se cargan desde el almacenamiento local del teléfono.
+*   **🔄 Sincronización Automática**: Si marcas asistencia sin señal, la app guarda un **"Ticket de Marcado Local"**. En cuanto recuperes conexión, el sistema sincronizará el registro con el servidor de UNINPAHU sin que tengas que hacer nada.
+
+---
+
+## 🌟 ¿Por qué instalarla?
+
+| Ventaja | Descripción |
+| :--- | :--- |
+| **Full Screen** | Desaparece la barra del navegador para darte más espacio. |
+| **Ahorro de Datos** | Una vez instalada, consume hasta un 80% menos de datos. |
+| **Acceso GPS** | La precisión del geofencing mejora al ejecutarse como app nativa. |
+
+> [!NOTE]
+> **Requerimiento**: Para un funcionamiento óptimo del Geofencing, asegúrate de dar permisos de "Ubicación" al momento de la instalación.

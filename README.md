@@ -51,6 +51,7 @@ graph TD
 - **/Frontend**: Plantillas PWA y activos estáticos optimizados.
 - **/docs**: 
   - [📘 Manual de Usuario](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/MANUAL_USUARIO.md): Guía para docentes y estudiantes.
+  - [📊 Requerimientos de Integración](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/requerimientos_tablas.md): Guía de tablas y campos para la universidad.
   - [📱 Configuración PWA](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/PWA_SETUP.md): Pasos para instalar como aplicación nativa.
   - [🔑 Seguridad y QR](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/asistencia.md): Detalles del flujo de rotación y validación.
   - [🗄️ Esquema de Base de Datos](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/database_schema.md): Estructura de tablas y relaciones SQLite.
@@ -81,5 +82,3 @@ graph TD
 1. **Geofencing**: Validación por radio de 100m (configurable) respecto a la sede.
 2. **Dynamic QR**: El token cambia constantemente, haciendo obsoletas las capturas de pantalla.
 3. **Grace Window**: Permite procesar escaneos legítimos que tardan unos segundos en viajar por la red tras un cambio de QR.
-
-

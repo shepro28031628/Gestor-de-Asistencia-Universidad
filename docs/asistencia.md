@@ -1,53 +1,63 @@
-# Gestión de Asistencia Dinámica 🚀
+# 🛡️ Protocolos de Asistencia y Seguridad
+> **Módulo**: Validación Dinámica | **Algoritmos**: Haversine + Totp-Like Rotation
 
-Este módulo describe la lógica de generación, validación y reporte final de asistencia, enfocándose en la prevención de fraude y automatización.
+Este documento detalla los mecanismos de seguridad implementados para garantizar la integridad del registro de asistencia, neutralizando intentos de fraude y automatizando la auditoría académica.
 
-## 📱 Rotación Viva de QR (Anti-Fraude)
+---
 
-Para neutralizar el fraude por compartición de fotografías o capturas de pantalla por servicios de mensajería (WhatsApp/Telegram), el sistema implementa una **Rotación Viva**:
+## 🔑 1. Rotación Viva de QR (Anti-Proxy)
 
-1.  **Generación Continua**: El token QR cambia automáticamente cada **15 segundos** mientras la sesión esté activa.
-2.  **Ventana de Gracia**: El servidor mantiene una validez histórica de **60 segundos**. Esto permite que si un estudiante escaneó un código justo antes de rotar, el registro sea aceptado exitosamente a pesar del retraso de red.
-3.  **Inutilidad de la Foto**: Una foto enviada a un tercero será inválida en menos de un minuto, obligando la presencia física frente a la pantalla del docente.
+Para evitar que un estudiante ausente marque asistencia mediante una foto enviada por un tercero, el sistema implementa una rotación de tokens de alta frecuencia.
 
-### 2. Validación Espacial (Geofencing)
-El sistema restringe el marcado de asistencia a perímetros físicos configurados (Campus).
-- **Radio de Tolerancia**: 100 metros (ajustable por sede).
-- **Sedes Reales (Bogotá/Teusaquillo)**:
-    - **Sede Teusaquillo (Dg. 40a)**: `4.6300, -74.0684`
-    - **Sede Principal (Cra. 16)**: `4.6318, -74.0665`
-    - **Sede Parkway (Dg. 40a)**: `4.6310, -74.0685`
-- **Algoritmo**: Haversine (calcula distancia circular sobre la superficie terrestre).
+| Parámetro | Valor | Descripción |
+| :--- | :--- | :--- |
+| **Intervalo de Rotación** | 15 Segundos | Tiempo de vida de un QR en pantalla. |
+| **Ventana de Gracia** | 60 Segundos | Margen para procesar escaneos en tránsito (latencia). |
+| **Algoritmo de Hash** | UUID v4 | Tokens no predecibles generados dinámicamente. |
 
-## 📧 Finalización y Reporte Automático
+> [!IMPORTANT]
+> **VENTANA DE GRACIA (Grace Window)**: El servidor mantiene en memoria los últimos 4 tokens generados. Esto asegura que si el QR rota mientras el estudiante está procesando el envío, el registro no sea rechazado injustamente.
 
-El sistema garantiza que cada clase tenga su reporte de asistencia sin depender exclusivamente de la acción manual del docente.
+---
 
-### 1. Cierre Manual
-El docente puede presionar **"Finalizar y Enviar Reporte"** en cualquier momento para cerrar la sesión anticipadamente y recibir el reporte inmediato.
+## 🌍 2. Validación Espacial (Geofencing)
 
-### 2. Cierre Automático (Monitor de Horarios)
-El backend ejecuta un **Monitor de Horarios** (hilo daemon) que:
-1. Verifica cada 60 segundos las sesiones activas.
-2. Compara la hora actual con el `end_time` académico de la base de datos.
-3. Si la clase ha terminado cronológicamente, el sistema dispara el flujo de clausura:
-   - Marca la sesión como inactiva.
-   - Genera el reporte consolidado en formato HTML.
-   - Envía el correo electrónico al docente automáticamente.
+El sistema utiliza la **Fórmula de Haversine** para calcular la distancia ortodrómica entre dos puntos de una esfera (la Tierra) a partir de sus longitudes y latitudes.
 
-```ascii
-[Monitor de Horarios] --- (60s) ---> ¿Clase Terminada Académicamente?
-                                             |
-                                     +-------+-------+
-                                     |               |
-                                    NO               SI
-                                     |               |
-                                 Continuar      1. Inactivar Sesión
-                                                2. Consolidar Presentes/Ausentes
-                                                3. Enviar Reporte HTML (SMTP)
+### Sedes Configuradas (Campus UNINPAHU)
+
+| Sede | Latitud | Longitud | Radio Tolerancia |
+| :--- | :--- | :--- | :--- |
+| **Teusaquillo** | `4.6300` | `-74.0684` | 100 Metros |
+| **Principal** | `4.6318` | `-74.0665` | 100 Metros |
+| **Parkway** | `4.6310` | `-74.0685` | 120 Metros |
+
+> [!TIP]
+> Si el estudiante se encuentra a una distancia mayor al radio permitido respecto a **cualquiera** de las sedes institucionales, el servidor arrojará un error de `FUERA_DE_RANGO` y bloqueará el registro.
+
+---
+
+## 🤖 3. Monitor de Horarios (Cierre Autónomo)
+
+El backend ejecuta un proceso daemon encargado de auditar la vida de las sesiones académicas para garantizar el envío de reportes, incluso si el docente olvida cerrar la sesión.
+
+```mermaid
+graph TD
+    A[Monitor de Horarios] -->|Check cada 60s| B{¿Hora Actual > End_Time?}
+    B -- NO --> C[Mantener Sesión Viva]
+    B -- SI --> D[Disparar Protocolo de Clausura]
+    D --> E[Inactivar QR]
+    E --> F[Generar Reporte Consolidado]
+    F --> G[Envío SMTP a Correo Institucional]
 ```
 
-## 🔍 Reglas de Validación de Marcado
-- **Token Vivo**: Solo los tokens generados en los últimos 60 segundos son aceptados.
-- **Geocerca (Haversine)**: El estudiante debe estar dentro del radio permitido (configurable, defecto 100m) del campus detectado por GPS.
-- **Unicidad Estudiantil**: El sistema impide registros duplicados para el mismo estudiante en la misma sesión.
+---
+
+## 🔍 Resumen de Reglas de Marcado
+
+1.  **Sincronía Temporal**: Solo se aceptan marcaciones durante el bloque horario oficial del grupo.
+2.  **Unicidad Estricta**: Un `student_id` no puede tener más de una entrada exitosa para la misma `session_id`.
+3.  **Auditoría de Ubicación**: Cada registro de asistencia (`attendances`) guarda la distancia exacta (en metros) que el estudiante tenía respecto al centro de la sede al momento del marcado.
+
+> [!NOTE]
+> **Integridad de Datos**: Los reportes automáticos se envían en formato HTML enriquecido, facilitando la lectura directa desde dispositivos móviles por parte del docente.
