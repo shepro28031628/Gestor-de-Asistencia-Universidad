@@ -51,6 +51,33 @@ graph TD
     F --> G[Envío SMTP a Correo Institucional]
 ```
 
+### Flujo de Decisión (ASCII)
+```text
+[ Monitor de Horarios ]
+          |
+    (Check cada 60s)
+          |
+          v
+  /-----------------\
+  | ¿Hora Actual >  |--- NO ---> [ Mantener Sesión Viva ]
+  |   End_Time?     |
+  \-----------------/
+          |
+        ( SI )
+          |
+          v
+  [ Protocolo de Clausura ]
+          |
+          v
+  [ Inactivar Token QR  ]
+          |
+          v
+  [ Generar Consolidado ]
+          |
+          v
+  [ Envío Email Docente ]
+```
+
 ---
 
 ## 🔍 Resumen de Reglas de Marcado

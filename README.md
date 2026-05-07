@@ -1,6 +1,6 @@
 # UNINPAHU Asistencia - PWA de Gestión Académica 🎓🚀
 
-![UNINPAHU Logo](Frontend/static/img/logo.png)
+![UNINPAHU Logo](Frontend/static/img/LOGO.png)
 
 **UNINPAHU Asistencia** es una solución integral de software diseñada para optimizar y asegurar el registro de asistencia en el entorno universitario de UNINPAHU, contribuyendo a una mejor gestión académica y la interacción entre docentes y estudiantes.
 
@@ -41,18 +41,19 @@ graph TD
     B -->|Auditoría Minuto a Minuto| D[Monitor de Horarios]
     D -->|Auto-Cierre| E[Reporte Email SMTP]
     B -->|SQL WAL Mode| F[(SQLite DB)]
+```
 
 ## 📦 Estructura del Proyecto
 - **/Backend**: Rutas API, lógica de seguridad y el `monitor_de_horarios`.
 - **/Frontend**: Plantillas PWA y activos estáticos optimizados.
 - **/docs**: 
-  - [📘 Manual de Usuario](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/MANUAL_USUARIO.md): Guía para docentes y estudiantes.
-  - [📊 Requerimientos de Integración](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/requerimientos_tablas.md): Guía de tablas y campos para la universidad.
-  - [📱 Configuración PWA](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/PWA_SETUP.md): Pasos para instalar como aplicación nativa.
-  - [🔑 Seguridad y QR](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/asistencia.md): Detalles del flujo de rotación y validación.
-  - [🗄️ Esquema de Base de Datos](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/database_schema.md): Estructura de tablas y relaciones SQLite.
-  - [🌐 API Endpoints](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/api_endpoints.md): Documentación de rutas y parámetros.
-  - [💾 Persistencia Offline](file:///d:/Desktop/U/asistencia%20uninpahu/Gestor%20de%20Asistencia%20Universidad/docs/persistencia.md): Funcionamiento del modo WAL y cola local.
+  - [📘 Manual de Usuario](docs/MANUAL_USUARIO.md): Guía para docentes y estudiantes.
+  - [📊 Requerimientos de Integración](docs/requerimientos_tablas.md): Guía de tablas y campos para la universidad.
+  - [📱 Configuración PWA](docs/PWA_SETUP.md): Pasos para instalar como aplicación nativa.
+  - [🔑 Seguridad y QR](docs/asistencia.md): Detalles del flujo de rotación y validación.
+  - [🗄️ Esquema de Base de Datos](docs/database_schema.md): Estructura de tablas y relaciones SQLite.
+  - [🌐 API Endpoints](docs/api_endpoints.md): Documentación de rutas y parámetros.
+  - [💾 Persistencia Offline](docs/persistencia.md): Funcionamiento del modo WAL y cola local.
 
 ---
 
