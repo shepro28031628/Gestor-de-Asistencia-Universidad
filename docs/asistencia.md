@@ -116,3 +116,9 @@ Al accionarlo, el sistema genera dinámicamente un código QR utilizando un serv
            v
 [ Profesor Escanea el QR  ] ---> [ Validación en Backend ] ---> [ Registro Manual Exitoso ]
 ```
+
+### Escáner Continuo (Lado Docente)
+Para procesar las filas de estudiantes de manera rápida, el profesor cuenta con un escáner que funciona en **modo continuo**. 
+
+- **Optimización Anti-Spam**: El escáner incluye un temporizador (3000ms) para ignorar escaneos repetidos del mismo QR, evitando recargar el backend con llamadas redundantes.
+- **Feedback Sensorial**: Al escanear a un alumno exitosamente, la interfaz provee un cambio visual y un patrón de vibración (`navigator.vibrate`) que confirma la acción, de forma que el profesor no necesite mirar la pantalla para cada estudiante validado.
