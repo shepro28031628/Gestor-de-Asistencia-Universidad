@@ -154,14 +154,14 @@ def get_token_vivo(schedule_id):
     Implementa la ROTACIÓN VIVA: Genera un nuevo token cada 15 segundos
     pero mantiene válidos los anteriores por 60 segundos (Ventana de Gracia).
     """
-    now = datetime.now()
+    now_utc = datetime.utcnow()
     with get_db() as conn:
         # 1. LIMPIEZA: Solo desactivamos tokens que tengan más de 1 minuto (Margen para el estudiante)
-        limite_gracia = (now - timedelta(seconds=60)).strftime("%Y-%m-%d %H:%M:%S")
+        limite_gracia = (now_utc - timedelta(seconds=60)).strftime("%Y-%m-%d %H:%M:%S")
         conn.execute('UPDATE class_sessions SET is_active = 0 WHERE schedule_id = ? AND created_at < ? AND is_active = 1', (schedule_id, limite_gracia))
         
         # 2. ROTACIÓN: Buscamos si ya se generó uno en los últimos 15 segundos
-        limite_rotacion = (now - timedelta(seconds=15)).strftime("%Y-%m-%d %H:%M:%S")
+        limite_rotacion = (now_utc - timedelta(seconds=15)).strftime("%Y-%m-%d %H:%M:%S")
         reciente = conn.execute('SELECT qr_token FROM class_sessions WHERE schedule_id = ? AND created_at >= ? AND is_active = 1 ORDER BY created_at DESC', (schedule_id, limite_rotacion)).fetchone()
         
         if reciente:
@@ -169,7 +169,8 @@ def get_token_vivo(schedule_id):
         
         # 3. Si no hay token fresco, creamos el siguiente eslabón de la cadena
         nuevo_token = str(uuid.uuid4())
-        expires_at = (now + timedelta(minutes=15)).isoformat()
+        now_local = datetime.now()
+        expires_at = (now_local + timedelta(minutes=15)).isoformat()
         conn.execute('INSERT INTO class_sessions (schedule_id, qr_token, expires_at, is_active) VALUES (?, ?, ?, 1)', (schedule_id, nuevo_token, expires_at))
         conn.commit()
         return jsonify({"token": nuevo_token})
