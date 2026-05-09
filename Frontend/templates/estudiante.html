@@ -22,9 +22,14 @@
         </div>
         <h1 class="text-3xl font-black text-[#002B49] tracking-tighter uppercase leading-none">Mi Portal</h1>
         <p class="text-slate-600 font-bold text-sm mt-1 uppercase tracking-tight" id="student-name">Estudiante</p>
-        <button onclick="logout()" class="mt-4 text-[10px] font-black text-slate-500 hover:text-red-500 uppercase flex items-center justify-center gap-2 mx-auto tracking-widest transition-colors">
-            <i class="fas fa-sign-out-alt"></i> Salir
-        </button>
+        <div class="flex justify-center gap-6 mt-4">
+            <button onclick="showMyQR()" class="text-[10px] font-black text-[#FF4D00] hover:text-orange-600 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
+                <i class="fas fa-qrcode"></i> Mi QR
+            </button>
+            <button onclick="logout()" class="text-[10px] font-black text-slate-500 hover:text-red-500 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
     </div>
 
     <!-- TABS COMPLETOS -->
@@ -105,6 +110,20 @@
             <div class="absolute inset-0 border-[30px] border-black/20 pointer-events-none"></div>
         </div>
         <button onclick="stopScanner()" class="w-full mt-6 text-[#002B49] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar Escáner</button>
+    </div>
+</div>
+
+<!-- MODAL MI QR -->
+<div id="my-qr-modal" class="fixed inset-0 z-[200] hidden flex flex-col items-center justify-center p-6 transition-all duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="hideMyQR()"></div>
+    <div class="glass-card relative w-full max-w-sm z-10 p-8 shadow-2xl animate-in zoom-in-90 flex flex-col items-center">
+        <h2 class="text-[#002B49] text-center text-sm font-black uppercase mb-6">Mi Código QR</h2>
+        <div class="p-4 bg-white rounded-2xl shadow-inner border-4 border-slate-100 flex items-center justify-center w-48 h-48 mb-4">
+            <!-- Imagen del QR generada dinámicamente -->
+            <img id="my-qr-img" src="" alt="Código QR" class="w-full h-full object-contain">
+        </div>
+        <p class="text-[10px] font-bold text-slate-500 uppercase text-center mb-6">Muestra este código al profesor para el registro manual</p>
+        <button onclick="hideMyQR()" class="w-full mt-2 text-[#002B49] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar</button>
     </div>
 </div>
 
@@ -344,6 +363,23 @@ async function loadMyHistory() {
 }
 
 function logout() { localStorage.clear(); window.location.href = '/logout'; }
+
+/**
+ * Muestra el modal con el código QR del estudiante.
+ */
+function showMyQR() {
+    // Genera el QR usando la API externa basándose en el nombre de usuario o ID
+    const qrData = user.username || user.id;
+    document.getElementById('my-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+    document.getElementById('my-qr-modal').classList.remove('hidden');
+}
+
+/**
+ * Oculta el modal del código QR del estudiante.
+ */
+function hideMyQR() {
+    document.getElementById('my-qr-modal').classList.add('hidden');
+}
 
 // --- CICLO DE VIDA DE LA APP ---
 sync(); // Carga inicial

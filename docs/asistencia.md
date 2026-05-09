@@ -88,3 +88,31 @@ graph TD
 
 > [!NOTE]
 > **Integridad de Datos**: Los reportes automáticos se envían en formato HTML enriquecido, facilitando la lectura directa desde dispositivos móviles por parte del docente.
+
+---
+
+## 📱 4. Mi Código QR (Identificación Estudiantil)
+
+Para facilitar los registros manuales por parte del docente (en casos de fallos de red o problemas con el dispositivo del estudiante), cada estudiante cuenta con un botón **"Mi QR"** en su portal. 
+
+Al accionarlo, el sistema genera dinámicamente un código QR utilizando un servicio externo, encriptando su identificación (ID/Username) para que el profesor pueda escanearlo directamente desde su dispositivo y validarlo en su lista.
+
+### Flujo de Identificación (ASCII)
+```text
+[ Perfil de Estudiante ]
+           |
+           v
+      ( Clic en "Mi QR" )
+           |
+           v
+ /-------------------------\
+ |  Petición a API Externa |
+ |  (api.qrserver.com)     |
+ \-------------------------/
+           |
+           v
+[ Despliegue de Modal QR ]
+           |
+           v
+[ Profesor Escanea el QR  ] ---> [ Validación en Backend ] ---> [ Registro Manual Exitoso ]
+```
