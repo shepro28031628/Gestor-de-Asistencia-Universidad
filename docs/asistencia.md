@@ -122,3 +122,29 @@ Para procesar las filas de estudiantes de manera rápida, el profesor cuenta con
 
 - **Optimización Anti-Spam**: El escáner incluye un temporizador (3000ms) para ignorar escaneos repetidos del mismo QR, evitando recargar el backend con llamadas redundantes.
 - **Feedback Sensorial**: Al escanear a un alumno exitosamente, la interfaz provee un cambio visual y un patrón de vibración (`navigator.vibrate`) que confirma la acción, de forma que el profesor no necesite mirar la pantalla para cada estudiante validado.
+
+---
+
+## 🔔 5. Consolidación de Notificaciones
+
+Para mantener una interfaz limpia y evitar la saturación visual detectada en el polling dinámico, el sistema aplica una lógica de consolidación en el backend antes de enviar los datos al frontend.
+
+### Estrategia de Agrupación
+- **Clases en Curso**: Se agrupan por `schedule_id`. Aunque existan múltiples tokens QR activos (por ventana de gracia), el estudiante solo verá un banner por materia.
+- **Citaciones**: Se agrupan por docente y mensaje (`GROUP BY teacher_name, message`). Esto evita que múltiples clics accidentales del docente inunden la pantalla del alumno con alertas idénticas.
+
+### Diagrama de Flujo de Datos (ASCII)
+```text
+[ Backend: DB ] 
+      |
+      | (Múltiples Sesiones/Citaciones)
+      v
+[ Lógica SQL: GROUP BY ] <--- FILTRO APLICADO
+      |
+      | (Registros Únicos Consolidados)
+      v
+[ Frontend: Portal Estudiante ]
+      |
+      v
+[ Visualización Limpia (1 Banner por Evento) ]
+```

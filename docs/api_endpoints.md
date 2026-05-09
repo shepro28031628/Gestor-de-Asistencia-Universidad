@@ -1,97 +1,66 @@
 # 🌐 Especificación Técnica de la API - UNINPAHU
-> **Base URL**: `http://localhost:5001/api` | **Formato**: `application/json`
+> **Versión**: 1.2 | **Base URL**: `/api` | **Seguridad**: Session-Based + Token Rotation
 
-Esta API RESTful es el corazón del sistema de asistencia, gestionando desde la autenticación biométrica (fotos) hasta la rotación de seguridad de grado bancario para los códigos QR.
-
----
-
-> [!IMPORTANT]
-> **SEGURIDAD DINÁMICA (ANTI-SPOOFING)**
-> La API implementa una ventana de validación temporal estricta. Los tokens generados expiran cada 15 segundos, invalidando cualquier intento de uso de capturas de pantalla o fotos compartidas.
+Este catálogo detalla la interfaz de comunicación entre el frontend (PWA) y el backend (Flask), garantizando la integridad de los procesos de registro académico.
 
 ---
 
 ## 🔐 1. Módulo: Autenticación (`/auth`)
 
-### `POST /login`
-Punto de entrada principal para el acceso al sistema.
-
-```json
-// Request
-{
-  "username": "20231001",
-  "password": "hashed_password",
-  "role": "estudiante"
-}
-
-// Response (Success)
-{
-  "status": "success",
-  "user": {
-    "id": 1,
-    "full_name": "Edinsson ...",
-    "role": "estudiante",
-    "profile_pic": "/static/uploads/p1.jpg"
-  }
-}
-```
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `POST` | `/login` | Valida credenciales y establece la sesión. Retorna el perfil completo del usuario. |
+| `POST` | `/update-profile-pic` | Sube y vincula una foto de perfil (Multipart/FormData). |
 
 ---
 
-## 📋 2. Módulo: Gestión de Asistencia (`/attendance`)
+## 📋 2. Módulo: Operaciones Estudiante (`/attendance`)
 
-### `POST /activar` (Docente)
-Inicia el ciclo de vida de una clase y activa el monitor de cierre.
-
-> [!TIP]
-> Al activar una clase, el backend reserva los recursos y comienza el proceso de rotación en `token-vivo`.
-
-### `POST /marcar` (Estudiante)
-El endpoint más crítico. Realiza validaciones cruzadas.
-
-**Validaciones Realizadas:**
-1. **Token Vivo**: Verifica que el QR escaneado sea el actual o esté en la ventana de gracia.
-2. **Geofencing**: Compara `lat/lng` vs coordenadas de la sede (Haversine).
-3. **Unicidad**: Impide doble marcado para la misma sesión.
-
-```json
-// Request Payload
-{
-  "token": "uuid-v4-rotativo",
-  "student_id": 12,
-  "lat": 4.6543,
-  "lng": -74.0892
-}
-```
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/progreso/<username>` | Retorna el % de asistencia por materia basado en el calendario académico. |
+| `GET` | `/horario/<username>` | Obtiene las clases programadas para el usuario autenticado. |
+| `GET` | `/sesiones-activas/<username>` | Lista las clases que tienen un QR activo en el momento del polling. (Consolidado). |
+| `POST` | `/marcar` | Registro de asistencia con validación de Token QR y Geofencing (Haversine). |
+| `GET` | `/get-citaciones/<id>` | Obtiene alertas de citación activa enviadas por docentes. (Consolidado). |
+| `POST` | `/subir-justificacion` | Carga de soportes (PDF/Imagen) para inasistencias. |
+| `GET` | `/historial` | Registro histórico de marcaciones realizadas por el estudiante. |
 
 ---
 
-## 🕒 3. Ciclo de Vida de una Sesión (Trazabilidad)
+## 🎓 3. Módulo: Operaciones Docente (`/attendance`)
+
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `POST` | `/activar` | Inicia una sesión de clase y genera el primer token QR. |
+| `GET` | `/token-vivo/<id>` | Gestiona la rotación dinámica (cada 15s) con ventana de gracia de 60s. |
+| `POST` | `/finalizar` | Cierra la sesión manualmente y dispara el reporte SMTP al correo institucional. |
+| `GET` | `/estudiantes-sesion/<id>` | Lista de alumnos inscritos con su estado de marcación en tiempo real. |
+| `POST` | `/marcar-manual` | Permite al docente registrar a un alumno (Ej: fallo de dispositivo). |
+| `POST` | `/crear-citacion` | Genera una alerta persistente para un estudiante específico. |
+| `GET` | `/get-justificaciones-docente` | Bandeja de entrada para revisar soportes cargados por alumnos. |
+| `GET` | `/historial-docente/<username>` | Resumen de clases pasadas con métricas de asistencia. |
+
+---
+
+## 🛠️ Lógica de Consolidación (Anti-Spam)
+
+Para evitar la saturación de la UI, los siguientes endpoints aplican filtrado de duplicados en el servidor:
 
 ```ascii
-[ DOCENTE ] --( /activar )--> [ SESIÓN ABIERTA ]
-                                     |
-                                     v (Cada 15s)
-[ CLIENTE ] <--( /token-vivo )-- [ ROTACIÓN QR ]
-       |                             |
-       +------( /marcar )------> [ VALIDACIÓN ]
-                                     |
-[ MONITOR ] --( /finalizar )---> [ CIERRE & REPORTE SMTP ]
+[ Cliente ] --( Polling )--> [ API ]
+                               |
+       /-----------------------+-----------------------\
+       |                                               |
+ [ Sesiones Activas ]                          [ Citaciones ]
+ GROUP BY schedule_id                    GROUP BY teacher_name, message
+ (Evita duplicados por                   (Evita duplicados por
+  rotación de tokens)                     reincidencia de alertas)
 ```
 
 ---
 
-## 📨 4. Notificaciones y Citaciones
-
-### `POST /crear-citacion`
-Permite al docente generar alertas preventivas para estudiantes con baja asistencia.
-
-### `POST /subir-justificacion`
-Gestión de documentos (Multipart/Form-Data). Los archivos se almacenan con hashing de nombre para evitar colisiones.
-
----
-
-## 🛡️ Protocolos de Resiliencia
-
-1.  **Sincronización Offline**: La API está diseñada para recibir marcaciones en lote si el estudiante perdió conexión momentáneamente.
-2.  **Auto-Cierre**: Un daemon en segundo plano audita cada 60s las sesiones abiertas. Si la hora actual > hora de fin académica, la sesión se clausura y se envía el reporte al docente.
+## 🛡️ Protocolos de Seguridad
+1. **Validación de Tiempo**: No se aceptan marcaciones fuera del rango horario del `schedule`.
+2. **Validación Espacial**: Bloqueo automático si el estudiante está a >100m del centro del campus.
+3. **Unicidad de Marcado**: Se impide el registro de múltiples asistencias de un mismo alumno para una misma sesión (`UNIQUE constraint`).

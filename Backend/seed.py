@@ -61,11 +61,35 @@ def restore_database():
     cursor.execute("INSERT INTO groups (group_number, subject_id, teacher_id, start_date, end_date, jornada) VALUES ('750', ?, 2, '2026-02-02', '2026-05-30', 'Diurno')", (sub_vg,))
     group_vg = cursor.lastrowid
 
+    # Inteligencia Artificial
+    cursor.execute("INSERT INTO subjects (code, name) VALUES ('IS1793', 'INTELIGENCIA ARTIFICIAL')")
+    sub_ia = cursor.lastrowid
+    cursor.execute("INSERT INTO groups (group_number, subject_id, teacher_id, start_date, end_date, jornada) VALUES ('801', ?, 1, '2026-02-02', '2026-05-30', 'Nocturno')", (sub_ia,))
+    group_ia = cursor.lastrowid
+
+    # Programación Web
+    cursor.execute("INSERT INTO subjects (code, name) VALUES ('IS1794', 'PROGRAMACION WEB AVANZADA')")
+    sub_web = cursor.lastrowid
+    cursor.execute("INSERT INTO groups (group_number, subject_id, teacher_id, start_date, end_date, jornada) VALUES ('402', ?, 2, '2026-02-02', '2026-05-30', 'Diurno')", (sub_web,))
+    group_web = cursor.lastrowid
+
+    # Ética
+    cursor.execute("INSERT INTO subjects (code, name) VALUES ('HU1001', 'ETICA PROFESIONAL')")
+    sub_et = cursor.lastrowid
+    cursor.execute("INSERT INTO groups (group_number, subject_id, teacher_id, start_date, end_date, jornada) VALUES ('101', ?, 1, '2026-02-02', '2026-05-30', 'Virtual')", (sub_et,))
+    group_et = cursor.lastrowid
+
     # --- DATOS DE PRUEBA: HORARIOS ---
-    # Sábados
+    # Sábados (Inmediato para pruebas)
     cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'S', '07:00', '23:59')", (group_ml,))
-    # Miércoles
+    cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 2, 'S', '08:00', '22:00')", (group_ia,))
+    
+    # Lunes y Miércoles
+    cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'M', '18:15', '21:15')", (group_web,))
     cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 1, 'W', '14:15', '17:15')", (group_vg,))
+    
+    # Jueves
+    cursor.execute("INSERT INTO schedules (group_id, room_id, day, start_time, end_time) VALUES (?, 2, 'R', '18:15', '20:15')", (group_et,))
 
     # --- DATOS DE PRUEBA: ESTUDIANTES ---
     estudiantes = [

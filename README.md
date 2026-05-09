@@ -21,6 +21,7 @@ El proyecto transforma el proceso tradicional de llamado a lista en una interacc
 - **Seguridad Viva (Anti-Fraude)**: El código QR rota automáticamente cada 15 segundos. Incluye una "ventana de gracia" de 60 segundos para validar escaneos recientes, neutralizando fotos compartidas por WhatsApp.
 - **Monitoreo en Vivo**: Dashboard con actualización de asistentes cada 3 segundos.
 - **Cierre Automático e Inteligente**: Un monitor en segundo plano audita los horarios y finaliza las clases exactamente cuando terminan cronológicamente.
+- **Consolidación de Notificaciones (Anti-Spam)**: Filtrado inteligente en el backend para mostrar un único banner por evento, evitando saturación por rotación de tokens o alertas repetidas.
 - **Reportes Automáticos por Email**: Al finalizar la clase, el docente recibe un reporte consolidado en HTML directamente en su correo institucional.
 
 ---
@@ -67,11 +68,27 @@ graph TD
 2. **Configurar Correo (Opcional)**:
    Edita las credenciales SMTP en `Backend/routes/attendance.py` para habilitar el envío real de reportes.
 
-3. **Iniciar**:
+3. **Inicializar Datos (Pruebas)**:
+   Si es la primera vez o deseas limpiar el sistema:
+   ```bash
+   python Backend/seed.py
+   ```
+
+4. **Iniciar**:
    ```bash
    python Backend/app.py
    ```
    Acceso: [http://localhost:5001](http://localhost:5001)
+
+---
+
+## 🔐 Credenciales de Prueba
+| Rol | Usuario | Password |
+| :--- | :--- | :--- |
+| **Estudiante** | `202518003330` | `123` |
+| **Estudiante** | `2025100001` | `123` |
+| **Docente** | `elfar_morantes` | `123` |
+| **Docente** | `dakar_sarmiento` | `123` |
 
 ---
 

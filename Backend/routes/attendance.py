@@ -362,7 +362,7 @@ def get_horario(username):
 def get_sesiones_activas(username):
     with get_db() as conn:
         query = '''
-            SELECT cs.id as session_id, sub.name as materia, r.code as salon, c.name as sede, cs.expires_at
+            SELECT s.id as schedule_id, sub.name as materia, r.code as salon, c.name as sede, MAX(cs.expires_at) as expires_at
             FROM class_sessions cs
             JOIN schedules s ON cs.schedule_id = s.id
             JOIN groups g ON s.group_id = g.id
@@ -372,6 +372,7 @@ def get_sesiones_activas(username):
             JOIN rooms r ON s.room_id = r.id
             JOIN campuses c ON r.campus_id = c.id
             WHERE u.username = ? AND cs.is_active = 1
+            GROUP BY s.id
         '''
         results = conn.execute(query, (username,)).fetchall()
         activas = []
@@ -510,10 +511,11 @@ def get_citaciones(student_id):
     """Obtiene las citaciones activas para el estudiante."""
     with get_db() as conn:
         query = '''
-            SELECT c.id, u.full_name as teacher_name, c.timestamp 
+            SELECT MIN(c.id) as id, u.full_name as teacher_name, MAX(c.timestamp) as timestamp 
             FROM citations c 
             JOIN users u ON c.teacher_id = u.id 
             WHERE c.student_id = ? AND c.status = 'activa'
+            GROUP BY u.full_name, c.message
         '''
         rows = conn.execute(query, (student_id,)).fetchall()
         return jsonify([dict(r) for r in rows])
