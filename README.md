@@ -23,6 +23,7 @@ El proyecto transforma el proceso tradicional de llamado a lista en una interacc
 - **Cierre Automático e Inteligente**: Un monitor en segundo plano audita los horarios y finaliza las clases exactamente cuando terminan cronológicamente.
 - **Consolidación de Notificaciones (Anti-Spam)**: Filtrado inteligente en el backend para mostrar un único banner por evento, evitando saturación por rotación de tokens o alertas repetidas.
 - **Reportes Automáticos por Email**: Al finalizar la clase, el docente recibe un reporte consolidado en HTML directamente en su correo institucional.
+- **Migración Inteligente (Excel)**: Script importador que mapea dinámicamente columnas de un archivo institucional (formato OLE2), traduciendo automáticamente códigos de días, horas y asignando documentos de identidad como login.
 
 ---
 
@@ -55,6 +56,8 @@ graph TD
   - [🗄️ Esquema de Base de Datos](docs/database_schema.md): Estructura de tablas y relaciones SQLite.
   - [🌐 API Endpoints](docs/api_endpoints.md): Documentación de rutas y parámetros.
   - [💾 Persistencia Offline](docs/persistencia.md): Funcionamiento del modo WAL y cola local.
+  - [📥 Migración de Datos](docs/importacion_datos.md): Guía de carga masiva desde Excel.
+  - [🧪 Guía de Pruebas](docs/credenciales_pruebas.md): Credenciales de prueba para validación de flujos.
 
 ---
 
@@ -83,12 +86,12 @@ graph TD
 ---
 
 ## 🔐 Credenciales de Prueba
-| Rol | Usuario | Password |
+| Rol | Usuario (Login con Doc.) | Password |
 | :--- | :--- | :--- |
-| **Estudiante** | `202518003330` | `123` |
-| **Estudiante** | `2025100001` | `123` |
-| **Docente** | `elfar_morantes` | `123` |
-| **Docente** | `dakar_sarmiento` | `123` |
+| **Estudiante Pruebas** | `est_test` | `123` |
+| **Docente Pruebas** | `profe_test` | `123` |
+| **Estudiante Real** | `202518003330` | `123` |
+| **Docente Real** | `elfar_morantes` | `123` |
 
 ---
 

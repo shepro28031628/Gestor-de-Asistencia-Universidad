@@ -519,3 +519,71 @@ def get_citaciones(student_id):
         '''
         rows = conn.execute(query, (student_id,)).fetchall()
         return jsonify([dict(r) for r in rows])
+
+@attendance_bp.route('/asistentes-sesion/<session_id>', methods=['GET'])
+def get_asistentes_sesion_id(session_id):
+    """Obtiene la lista de estudiantes que asistieron a una sesión específica."""
+    with get_db() as conn:
+        query = '''
+            SELECT u.full_name, u.username, a.timestamp, a.status
+            FROM attendances a
+            JOIN users u ON a.student_id = u.id
+            WHERE a.session_id = ?
+            ORDER BY u.full_name ASC
+        '''
+        rows = conn.execute(query, (session_id,)).fetchall()
+        return jsonify([dict(row) for row in rows])
+
+@attendance_bp.route('/riesgo-docente/<username>', methods=['GET'])
+
+
+@attendance_bp.route('/riesgo-docente/<username>', methods=['GET'])
+def get_riesgos_docente(username):
+    """Calcula dinámicamente qué estudiantes están en riesgo para un docente."""
+    with get_db() as conn:
+        # Buscamos a los estudiantes en los grupos del docente
+        query = '''
+            SELECT u.id as student_id, u.full_name as student_name, s.name as materia, 
+                   g.start_date, g.end_date,
+                   (SELECT COUNT(*) FROM schedules WHERE group_id = g.id) as sesiones_semanales,
+                   (SELECT COUNT(*) FROM attendances a 
+                    JOIN class_sessions cs ON a.session_id = cs.id 
+                    JOIN schedules sch ON cs.schedule_id = sch.id 
+                    WHERE sch.group_id = g.id AND a.student_id = u.id) as asistencias
+            FROM users u
+            JOIN enrollments e ON u.id = e.student_id
+            JOIN groups g ON e.group_id = g.id
+            JOIN subjects s ON g.subject_id = s.id
+            JOIN users teacher ON g.teacher_id = teacher.id
+            WHERE teacher.username = ?
+        '''
+        results = conn.execute(query, (username,)).fetchall()
+        riesgos = []
+        for r in results:
+            try:
+                # Lógica de cálculo de porcentaje basada en tiempo transcurrido
+                if not r['start_date'] or r['start_date'] == "":
+                    # Si no hay fechas reales, usamos un estimado de 16 semanas
+                    total_esperado = 16 * (r['sesiones_semanales'] or 1)
+                else:
+                    start = datetime.strptime(r['start_date'], "%Y-%m-%d")
+                    semanas = max(1, math.ceil((datetime.now() - start).days / 7))
+                    total_esperado = max(1, semanas * (r['sesiones_semanales'] or 1))
+                
+                porcentaje = int((r['asistencias'] / total_esperado) * 100)
+                
+                # Umbral de riesgo: Menos del 80% de asistencia
+                if porcentaje < 80:
+                    riesgos.append({
+                        "student_id": r['student_id'],
+                        "student_name": r['student_name'],
+                        "materia": r['materia'],
+                        "porcentaje": min(100, porcentaje)
+                    })
+            except:
+                pass
+        
+        # Ordenar por el riesgo más crítico
+        riesgos.sort(key=lambda x: x['porcentaje'])
+        return jsonify(riesgos[:15]) # Limitamos a 15 por rendimiento de vista
+

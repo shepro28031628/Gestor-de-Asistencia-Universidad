@@ -3,7 +3,10 @@ SCHEMA = '''
 CREATE TABLE IF NOT EXISTS academic_programs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    code TEXT UNIQUE
+    code TEXT UNIQUE,
+    tipo_programa TEXT,
+    nombre_facultad TEXT,
+    sigla_facultad TEXT
 );
 
 -- Usuarios del sistema: Estudiantes, Profesores y Administradores
@@ -12,7 +15,14 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT UNIQUE NOT NULL, -- Código institucional
     password TEXT NOT NULL,
     full_name TEXT NOT NULL,
-    email TEXT, -- Campo vital para reportes automáticos al docente
+    apellidos TEXT,
+    nombres TEXT,
+    email TEXT, -- Correo institucional
+    personal_email TEXT, -- Correo personal
+    tipo_doc TEXT,
+    numero_doc TEXT,
+    codigo_carnet TEXT, -- Guarda el CODIGO_ESTUDIANTE original
+    semestre TEXT,
     profile_pic TEXT, -- Ruta a la imagen de perfil en /static/uploads
     role TEXT CHECK(role IN ('estudiante', 'profesor', 'admin')) NOT NULL,
     program_id INTEGER,
@@ -23,6 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS campuses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
+    codigo_sede TEXT,
     latitude REAL, -- Latitud para Geofencing
     longitude REAL, -- Longitud para Geofencing
     radius_meters INTEGER DEFAULT 100 -- Radio permitido alrededor de la sede
@@ -32,6 +43,9 @@ CREATE TABLE IF NOT EXISTS campuses (
 CREATE TABLE IF NOT EXISTS rooms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT NOT NULL,
+    capacidad INTEGER,
+    descripcion TEXT,
+    disponibilidad TEXT,
     campus_id INTEGER,
     FOREIGN KEY (campus_id) REFERENCES campuses(id)
 );
@@ -49,6 +63,9 @@ CREATE TABLE IF NOT EXISTS groups (
     group_number TEXT NOT NULL,
     subject_id INTEGER,
     teacher_id INTEGER,
+    periodo_academico TEXT,
+    grupo_semestre TEXT,
+    intensidad_horaria TEXT,
     start_date TEXT, -- Fecha de inicio (YYYY-MM-DD)
     end_date TEXT,   -- Fecha de fin (YYYY-MM-DD)
     jornada TEXT,    -- Diurna, Nocturna, Sabatina
@@ -61,6 +78,7 @@ CREATE TABLE IF NOT EXISTS schedules (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     group_id INTEGER,
     room_id INTEGER,
+    codigo_tipo_clase TEXT,
     day TEXT NOT NULL, -- M, T, W, R, F, S, U
     start_time TEXT NOT NULL, -- HH:MM
     end_time TEXT NOT NULL,   -- HH:MM

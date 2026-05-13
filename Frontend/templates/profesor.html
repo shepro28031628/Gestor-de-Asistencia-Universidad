@@ -101,21 +101,29 @@
     </div>
 </div>
 
-<!-- MODAL FLOTANTE ESCÁNER DEL PROFESOR -->
-<div id="prof-scanner-modal" class="fixed inset-0 z-[200] hidden flex flex-col items-center justify-center p-6 transition-all duration-300">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="stopProfScanner()"></div>
-    <div class="glass-card relative w-full max-w-sm z-10 p-8 shadow-2xl animate-in zoom-in-90">
-        <h2 class="text-[#002B49] text-center text-sm font-black uppercase mb-2">Escáner de Alumnos</h2>
-        <p class="text-[10px] font-bold text-slate-500 uppercase text-center mb-6" id="scanner-status">Pase el QR del estudiante</p>
-        <div class="aspect-square rounded-[2rem] overflow-hidden bg-black shadow-inner border-4 border-slate-100 relative">
-            <div id="prof-reader" class="w-full h-full"></div>
-            <div class="absolute inset-0 border-[30px] border-black/20 pointer-events-none"></div>
-        </div>
-        <button onclick="stopProfScanner()" class="w-full mt-6 text-[#002B49] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar Escáner</button>
     </div>
 </div>
 
-<style>#prof-reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }</style>
+<!-- MODAL LISTADO DE ASISTENTES (HISTORIAL) -->
+<div id="history-modal" class="fixed inset-0 z-[200] hidden flex flex-col items-center justify-center p-6 transition-all duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeHistoryModal()"></div>
+    <div class="glass-card relative w-full max-w-sm z-10 p-8 shadow-2xl animate-in zoom-in-90 flex flex-col">
+        <h2 class="text-[#002B49] text-center text-sm font-black uppercase mb-1" id="history-modal-title">Asistentes</h2>
+        <p class="text-[9px] font-bold text-slate-400 uppercase text-center mb-6" id="history-modal-date"></p>
+        
+        <div id="history-modal-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+            <!-- Cargado dinámicamente -->
+        </div>
+
+        <button onclick="closeHistoryModal()" class="w-full mt-6 bg-[#002B49] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg">Cerrar</button>
+    </div>
+</div>
+
+<style>
+    #prof-reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+</style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -408,7 +416,7 @@ async function loadHistorial() {
         document.getElementById('history-list').innerHTML = data.length ? data.map(h => {
             const perc = (h.presentes / h.inscritos) * 100 || 0;
             return `
-            <div class="glass-card p-6 animate-in slide-in-from-right">
+            <div class="glass-card p-6 animate-in slide-in-from-right cursor-pointer hover:scale-[1.01] transition-all" onclick="viewSessionDetails(${h.id}, '${h.materia}', '${h.fecha}')">
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <p class="font-black text-sm text-[#002B49] uppercase tracking-tighter">${h.materia}</p>
@@ -422,6 +430,7 @@ async function loadHistorial() {
                 <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-[#FF4D00]" style="width: ${perc}%"></div>
                 </div>
+                <p class="text-[7px] font-black text-slate-400 uppercase mt-4 text-center tracking-widest">Click para ver listado</p>
             </div>
         `; }).join('') : '<div class="text-center py-20 text-slate-400 font-bold uppercase text-[10px]">No has activado sesiones aún</div>';
     } catch (e) { }
@@ -440,14 +449,56 @@ async function crearCitacion(studentId) {
 }
 
 async function loadAlertas() {
-    document.getElementById('alerts-list').innerHTML = `
-        <div class="bg-red-50 p-6 rounded-3xl flex justify-between items-center border border-red-100 animate-in slide-in-from-right">
-            <div>
-                <p class="font-black text-xs text-red-700 uppercase">OLIVIA FLORES</p>
-                <p class="text-[8px] font-bold text-red-400 uppercase">72% ASISTENCIA (Crítico)</p>
+    try {
+        const resp = await fetch(`/api/attendance/riesgo-docente/${user.username}`);
+        const data = await resp.json();
+        const container = document.getElementById('alerts-list');
+        
+        if (!data.length) {
+            container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold uppercase text-[10px]">No hay estudiantes en riesgo crítico</div>`;
+            return;
+        }
+
+        container.innerHTML = data.map(a => `
+            <div class="bg-red-50 p-6 rounded-3xl flex justify-between items-center border border-red-100 animate-in slide-in-from-right">
+                <div>
+                    <p class="font-black text-xs text-red-700 uppercase">${a.student_name}</p>
+                    <p class="text-[8px] font-bold text-red-400 uppercase">${a.porcentaje}% ASISTENCIA (${a.materia})</p>
+                </div>
+                <button onclick="crearCitacion(${a.student_id})" class="bg-red-600 text-white px-6 py-3 rounded-2xl text-[8px] font-black uppercase shadow-lg active:scale-95 transition-all">CITAR</button>
             </div>
-            <button onclick="crearCitacion(4)" class="bg-red-600 text-white px-6 py-3 rounded-2xl text-[8px] font-black uppercase shadow-lg active:scale-95 transition-all">CITAR</button>
-        </div>`;
+        `).join('');
+    } catch (e) {
+        document.getElementById('alerts-list').innerHTML = `<div class="text-center py-10 text-red-400 font-bold uppercase text-[10px]">Error al cargar alertas</div>`;
+    }
+}
+
+async function viewSessionDetails(sessionId, materia, fecha) {
+    document.getElementById('history-modal-title').innerText = materia;
+    document.getElementById('history-modal-date').innerText = fecha;
+    document.getElementById('history-modal-list').innerHTML = '<p class="text-center py-4 text-[10px] font-bold text-slate-400 uppercase animate-pulse">Cargando...</p>';
+    document.getElementById('history-modal').classList.remove('hidden');
+
+    try {
+        const resp = await fetch(`/api/attendance/asistentes-sesion/${sessionId}`);
+        const data = await resp.json();
+        
+        document.getElementById('history-modal-list').innerHTML = data.length ? data.map(a => `
+            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-black text-[#002B49] uppercase">${a.full_name}</span>
+                    <span class="text-[7px] font-bold text-slate-400 uppercase">${a.username}</span>
+                </div>
+                <span class="text-[7px] font-black text-emerald-500 uppercase">${a.timestamp.split(' ')[1]}</span>
+            </div>
+        `).join('') : '<p class="text-center py-10 text-[9px] font-bold text-slate-300 uppercase">Nadie asistió a esta clase</p>';
+    } catch (e) {
+        document.getElementById('history-modal-list').innerHTML = '<p class="text-center py-10 text-red-500 text-[9px] font-bold uppercase">Error al cargar datos</p>';
+    }
+}
+
+function closeHistoryModal() {
+    document.getElementById('history-modal').classList.add('hidden');
 }
 
 function logout() { localStorage.clear(); window.location.href = '/logout'; }
