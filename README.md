@@ -9,7 +9,13 @@ El proyecto transforma el proceso tradicional de llamado a lista en una interacc
 
 ---
 
-## ✨ Características de Vanguardia
+## ✨ Características de Vanguardia (UX Premium)
+
+### 🎨 Suite de Diseño Institucional
+- **Identidad Soft Peach**: Paleta de colores cálida basada en la marca UNINPAHU.
+- **Glassmorphism UI**: Interfaz moderna basada en capas de cristal traslúcido.
+- **Marca de Agua Nítida**: Fondo institucional suave pero 100% nítido.
+- **Animaciones Avanzadas**: Transiciones de salida, efectos 3D Tilt y láser QR.
 
 ### 👨‍🎓 Portal Estudiantil
 - **Validación Dual**: Verificación de ubicación GPS sincronizada con los campus de UNINPAHU.

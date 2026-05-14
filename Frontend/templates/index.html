@@ -16,13 +16,13 @@
 
         <div class="space-y-5">
             <div class="space-y-2">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider bg-white px-2 py-1 inline-block border-l-2 border-[var(--orange-main)]">NÚMERO DE DOCUMENTO</label>
-                <input type="text" id="username" placeholder="Tu número de cédula o T.I." class="w-full bg-[var(--orange-soft)] border-2 border-[var(--orange-border)] rounded-2xl px-6 py-4 focus:border-[var(--orange-main)] focus:bg-white outline-none font-bold text-[var(--orange-main)] transition-all">
+                <label class="text-[10px] font-black text-[var(--orange-main)] uppercase tracking-widest ml-1">Número de Documento</label>
+                <input type="text" id="username" placeholder="Tu número de cédula o T.I." class="w-full bg-[var(--orange-soft)] border-2 border-[var(--orange-border)] rounded-2xl px-6 py-4 focus:border-[var(--orange-main)] focus:bg-white outline-none font-bold text-gray-900 transition-all">
             </div>
 
             <div class="space-y-1.5">
                 <label class="text-[10px] font-bold text-[var(--orange-main)] uppercase tracking-widest ml-1">Contraseña</label>
-                <input type="password" id="password" placeholder="••••" class="w-full bg-[var(--orange-soft)] border-2 border-[var(--orange-border)] rounded-2xl px-6 py-4 focus:border-[var(--orange-main)] focus:bg-white outline-none font-bold text-[var(--orange-main)] transition-all">
+                <input type="password" id="password" placeholder="••••" class="w-full bg-[var(--orange-soft)] border-2 border-[var(--orange-border)] rounded-2xl px-6 py-4 focus:border-[var(--orange-main)] focus:bg-white outline-none font-bold text-gray-900 transition-all">
             </div>
 
             <button onclick="handleLogin()" class="w-full btn-uninpahu-orange py-5 rounded-2xl font-black shadow-xl active:scale-95 transition-all mt-4 flex items-center justify-center gap-3">
@@ -59,8 +59,12 @@ async function handleLogin() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     
-    // Validación básica de campos vacíos
     if (!username || !password) return showToast("Completa los datos", "warning");
+
+    const btn = document.querySelector('button[onclick="handleLogin()"]');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> VERIFICANDO...';
+    btn.disabled = true;
 
     try {
         const response = await fetch('/api/auth/login', {
@@ -72,7 +76,12 @@ async function handleLogin() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.message);
         
-        // PERSISTENCIA: Guardamos los datos esenciales del usuario en LocalStorage para toda la sesión PWA
+        playSuccessSound();
+        showToast("¡Bienvenido al sistema!", "success");
+        
+        // EFECTO DE TRANSICIÓN PREMIUM
+        document.body.classList.add('page-fade-out');
+
         localStorage.setItem('user', JSON.stringify({
             username: data.username, 
             name: data.full_name, 
@@ -81,11 +90,14 @@ async function handleLogin() {
             profile_pic: data.profile_pic
         }));
         
-        // Redirección según el rol devuelto por el servidor
-        window.location.href = data.role === 'profesor' ? '/profesor' : '/estudiante';
+        setTimeout(() => {
+            window.location.href = data.role === 'profesor' ? '/profesor' : '/estudiante';
+        }, 600);
         
     } catch (e) { 
-        showToast("Acceso denegado. Verifica tus credenciales.", "error"); 
+        showToast(e.message || "Acceso denegado.", "error"); 
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
     }
 }
 </script>

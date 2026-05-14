@@ -8,25 +8,25 @@
 
 <div class="max-w-4xl mx-auto p-6 flex flex-col items-center min-h-screen pb-24">
     
-    <!-- HEADER -->
-    <div class="text-center mt-8 mb-10 animate-in fade-in duration-700">
+    <!-- HEADER CON EFECTO VIDRIO PARA LEGIBILIDAD -->
+    <div class="glass-card p-8 text-center mt-8 mb-10 animate-in fade-in duration-700 border-white/20 shadow-xl">
         <div class="relative inline-block mb-4 group cursor-pointer" onclick="document.getElementById('profile-input').click()">
             <div id="user-avatar" class="w-24 h-24 bg-[var(--orange-main)] rounded-full flex items-center justify-center text-white border-4 border-white shadow-2xl overflow-hidden transition-all group-hover:scale-105">
                 <span id="user-initials" class="text-3xl font-black">--</span>
                 <img id="profile-img" class="hidden w-full h-full object-cover">
             </div>
-            <div class="absolute bottom-0 right-0 w-8 h-8 bg-[#FF4D00] border-4 border-white rounded-full shadow-lg flex items-center justify-center">
+            <div class="absolute bottom-0 right-0 w-8 h-8 bg-[var(--orange-main)] border-4 border-white rounded-full shadow-lg flex items-center justify-center">
                 <i class="fas fa-camera text-white text-[10px]"></i>
             </div>
             <input type="file" id="profile-input" class="hidden" accept="image/*" onchange="uploadProfilePic(this)">
         </div>
-        <h1 class="text-3xl font-black text-[var(--orange-700)] tracking-tighter uppercase leading-none">Mi Portal</h1>
-        <p class="text-slate-600 font-bold text-sm mt-1 uppercase tracking-tight" id="student-name">Estudiante</p>
-        <div class="flex justify-center gap-6 mt-4">
-            <button onclick="showMyQR()" class="text-[10px] font-black text-[#FF4D00] hover:text-orange-600 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
+        <h1 class="text-3xl font-black text-[var(--orange-main)] tracking-tighter uppercase leading-none">Mi Portal</h1>
+        <p class="text-gray-800 font-bold text-sm mt-1 uppercase tracking-tight mb-4" id="student-name">Estudiante</p>
+        <div class="flex justify-center gap-6">
+            <button onclick="showMyQR()" class="text-[10px] font-black text-[var(--orange-main)] hover:text-orange-600 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
                 <i class="fas fa-qrcode"></i> Mi QR
             </button>
-            <button onclick="logout()" class="text-[10px] font-black text-slate-500 hover:text-red-500 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
+            <button onclick="logout()" class="text-[10px] font-black text-gray-700 hover:text-red-600 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
                 <i class="fas fa-sign-out-alt"></i> Salir
             </button>
         </div>
@@ -34,12 +34,12 @@
 
     <!-- TABS COMPLETOS -->
     <div class="flex gap-1 p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl mb-8 w-full max-w-md border border-white/20">
-        <button onclick="switchTab('asistencia')" id="tab-asistencia" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[var(--orange-700)] transition-all">Asistencia</button>
-        <button onclick="switchTab('justificaciones')" id="tab-justificaciones" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-slate-500 transition-all">Justificaciones</button>
-        <button onclick="switchTab('historial')" id="tab-historial" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-slate-500 transition-all">Mi Historial</button>
+        <button onclick="switchTab('asistencia')" id="tab-asistencia" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[var(--orange-main)] transition-all">Asistencia</button>
+        <button onclick="switchTab('justificaciones')" id="tab-justificaciones" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-gray-700 transition-all">Justificaciones</button>
+        <button onclick="switchTab('historial')" id="tab-historial" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-gray-700 transition-all">Mi Historial</button>
     </div>
 
-    <div id="tab-content" class="w-full max-w-md">
+    <div id="tab-content" class="w-full max-w-md card-tilt">
         
         <!-- PESTAÑA: ASISTENCIA -->
         <div id="content-asistencia" class="tab-pane animate-in slide-in-from-bottom-4">
@@ -224,6 +224,7 @@ async function processScan(token) {
             });
             const d = await resp.json();
             showToast(d.message, d.success ? "success" : "error");
+            if(d.success) playSuccessSound();
             sync(); // Actualiza el progreso si fue exitoso
         } catch (e) { 
             // COLA OFFLINE: Si no hay internet, guardamos el intento para después
@@ -331,8 +332,8 @@ function renderSelector(data) {
 function switchTab(tab) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
     document.getElementById(`content-${tab}`).classList.remove('hidden');
-    document.querySelectorAll('button[id^="tab-"]').forEach(b => b.className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-slate-500 transition-all");
-    document.getElementById(`tab-${tab}`).className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[var(--orange-700)] transition-all";
+    document.querySelectorAll('button[id^="tab-"]').forEach(b => b.className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-gray-700 transition-all");
+    document.getElementById(`tab-${tab}`).className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[var(--orange-main)] transition-all";
     if (tab === 'historial') loadMyHistory();
 }
 
@@ -340,11 +341,19 @@ function switchTab(tab) {
  * Obtiene y muestra el historial personal de asistencias.
  */
 async function loadMyHistory() {
+    const list = document.getElementById('student-history');
+    list.innerHTML = Array(3).fill(0).map(() => `
+        <div class="glass-card p-4 flex justify-between items-center skeleton-h-16 mb-3">
+            <div class="w-3/4 h-8 skeleton"></div>
+            <div class="w-1/4 h-6 skeleton ml-4"></div>
+        </div>
+    `).join('');
+
     try {
         const resp = await fetch(`/api/attendance/historial`);
         const data = await resp.json();
         const mine = data.filter(h => h.student_name === (user.full_name || user.name));
-        document.getElementById('student-history').innerHTML = mine.length ? mine.map(h => `
+        list.innerHTML = mine.length ? mine.map(h => `
             <div class="glass-card p-4 flex justify-between items-center animate-in slide-in-from-right border-l-4 ${h.status === 'manual' ? 'border-blue-500' : 'border-emerald-500'}">
                 <div class="flex flex-col">
                     <p class="font-black text-xs text-[var(--orange-700)] uppercase tracking-tight">${h.materia}</p>

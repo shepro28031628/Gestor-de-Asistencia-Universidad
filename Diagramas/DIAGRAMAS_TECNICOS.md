@@ -42,23 +42,22 @@ Muestra el flujo exacto de una marcación de asistencia exitosa.
 ```mermaid
 sequenceDiagram
     autonumber
-    participant E as Estudiante (Front)
+    participant E as Estudiante (QR)
+    participant P as Profesor (Escáner)
     participant B as Backend (Flask API)
     participant DB as SQLite DB
 
-    Note over E, B: Proceso de Marcación QR + GPS
-    E->>E: Capturar Coordenadas (GPS API)
-    E->>E: Escanear QR (QR Scanner)
-    E->>B: POST /api/attendance/marcar {token, lat, lng, student_id}
-    B->>B: Validar Token contra class_sessions
-    B->>B: Calcular Distancia (Fórmula Haversine)
-    alt Es Válido (Distancia < 50m)
-        B->>DB: INSERT INTO attendances (...)
-        DB-->>B: ID_Confirmación
-        B-->>E: 200 OK {success: true, message: "¡Presente!"}
-    else Fuera de Rango / Token Inválido
-        B-->>E: 400 Error {success: false, message: "Ubicación Incorrecta"}
-    end
+    Note over E, P: Flujo Alternativo: Docente Escanea a Alumno
+    E->>E: Mostrar QR Personal (Username/ID)
+    P->>P: Abrir Cámara (Html5Qrcode)
+    P->>P: Capturar QR de Alumno
+    P->>B: POST /api/attendance/mark {username, schedule_id, status: 'manual_prof'}
+    B->>B: Validar sesión activa del Docente
+    B->>DB: INSERT INTO attendances (status='manual_prof')
+    DB-->>B: Confirmación
+    B-->>P: 200 OK {success: true}
+    P->>P: Feedback Sensorial (Sonido/Vibración)
+    Note right of P: Lista "En Vivo" actualizada
 ```
 
 ---

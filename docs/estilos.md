@@ -1,33 +1,29 @@
-# Sistema de Identidad Visual - Escala Naranja
+# Guía de Estilos UNINPAHU (Premium)
 
-## 1. Técnica
-Se ha implementado un sistema de **Variables CSS (Custom Properties)** centralizado en `:root` para garantizar la coherencia cromática en toda la aplicación. Se utiliza una escala basada en el naranja institucional (#D35400) con variaciones de luminosidad para diferentes estados de UI.
+La interfaz utiliza el lenguaje visual **Soft Peach**, caracterizado por tonos cálidos, superficies traslúcidas y retroalimentación sensorial.
 
-### Variables Principales (Paleta Sobria)
-- `--orange-main`: #D35400 (Naranja institucional profundo)
-- `--orange-50`: #FFFBF5 (Crema suave para fondos)
-- `--orange-100`: #FDF2E9 (Bordes sutiles)
-- `--orange-600/700`: #A04000 (Énfasis y contraste alto)
+## 🎨 Paleta de Colores
+- **Naranja Principal (`--orange-main`):** `#FF7043` - Identidad institucional activa.
+- **Crema Melocotón (`--orange-soft`):** `#FFF5F2` - Fondo de tarjetas y contenedores.
+- **Borde Melocotón (`--orange-border`):** `#FFE0D6` - Delimitación sutil.
+- **Resplandor Naranja (`--orange-glow`):** `rgba(255, 112, 67, 0.3)` - Efectos de enfoque.
 
-## 2. Elementos Visuales
-### Iconografía
-- **Icono Principal:** Se utiliza `Icono-1.webp` en la pantalla de login, reemplazando al logo anterior para una estética más moderna y ligera.
-- **Botones:** Los botones de acción principal utilizan la clase `.btn-uninpahu-orange`.
+## 🪟 Arquitectura Glassmorphism
+Los paneles principales utilizan la clase `.glass-card`:
+- **Fondo:** `rgba(255, 255, 255, 0.75)`
+- **Efecto:** `blur(12px) saturate(160%)`
+- **Interactividad:** Efecto **Tilt 3D** en hover para sensación de profundidad física.
 
-## 3. Técnica de Fondo
-Para evitar la saturación visual, se utiliza un gradiente naranja extremadamente tenue sobre la fotografía institucional:
-```css
-linear-gradient(135deg, rgba(211, 84, 0, 0.08), rgba(255, 255, 255, 0.6))
-```
+## ❄️ Fondo Institucional (Marca de Agua)
+El fondo base (`body::before`) está configurado para ser nítido pero sutil:
+- **Opacidad:** Gradiente melocotón al 65%-80% sobre la foto institucional.
+- **Filtros:** `saturate(1.6) contrast(1.1)` para elevar los colores originales de la foto sin competir con el texto.
 
-## 4. Diagrama de Aplicación de Estilos
+## 🎬 Animaciones
+- **PWA-Transition:** Fade-out al cambiar de página para eliminar parpadeos bruscos.
+- **QR-Laser:** Línea de escaneo animada sobre el QR para indicar actividad en tiempo real.
+- **Skeletons:** Carga suave de datos mediante shimmer dinámico, evitando saltos de contenido.
 
-```ascii
-[ Pantalla Login ]
-    |
-    +-- [ Icono-1.webp ] --> Animación Hover (scale-105)
-    |
-    +-- [ Títulos ] -------> Color var(--orange-main)
-    |
-    +-- [ Inputs ] --------> Fondos Blancos + Bordes Orange-100
-```
+## 🔊 Feedback Sensorial
+- **Audio:** Tono de éxito (`880Hz`) al completar registros.
+- **Háptico:** Vibración breve en dispositivos móviles compatibles para confirmación de escaneo.

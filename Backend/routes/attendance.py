@@ -405,6 +405,31 @@ def get_estudiantes_sesion(schedule_id):
         estudiantes = conn.execute(query, (session_id, group['group_id'])).fetchall()
         return jsonify([dict(e) for e in estudiantes])
 
+@attendance_bp.route('/mark', methods=['POST'])
+def mark_prof_scan():
+    """Registro de asistencia por escaneo del profesor (Bidireccional)."""
+    data = request.json
+    username = data.get('username')
+    schedule_id = data.get('schedule_id')
+    status = data.get('status', 'manual_prof')
+
+    with get_db() as conn:
+        # Buscamos el ID del estudiante por su username (contenido en su QR)
+        student = conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()
+        if not student: return jsonify({"success": False, "message": "Estudiante no encontrado"}), 404
+
+        session = conn.execute('SELECT id FROM class_sessions WHERE schedule_id = ? AND date(created_at) = date("now")', (schedule_id,)).fetchone()
+        if not session:
+            return jsonify({"success": False, "message": "Inicie la sesión primero"}), 400
+
+        try:
+            conn.execute('INSERT INTO attendances (student_id, session_id, status) VALUES (?, ?, ?)', 
+                        (student['id'], session['id'], status))
+            conn.commit()
+            return jsonify({"success": True, "message": "Asistencia registrada"})
+        except:
+            return jsonify({"success": False, "message": "Ya tiene asistencia"}), 500
+
 @attendance_bp.route('/marcar-manual', methods=['POST'])
 def marcar_manual():
     """Registro de asistencia por parte del docente."""
