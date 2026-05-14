@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: gestor-asistencia-uninpahu
+    env: python
+    plan: free
+    buildCommand: "bash build.sh"
+    startCommand: "PYTHONPATH=Backend gunicorn 'app:create_app()'"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: FLASK_ENV
+        value: production
+    # Si se requiere persistencia de SQLite entre reinicios del servicio gratuito/pago:
+    # disk:
+    #   name: sqlite-data
+    #   mountPath: /opt/render/project/src/Backend/data
+    #   sizeGB: 1
