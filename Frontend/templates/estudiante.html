@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Mi Portal - UNINPAHU{% endblock %}
+
 
 {% block content %}
 <!-- CONTENEDOR DE NOTIFICACIONES VIVAS -->
@@ -11,7 +11,7 @@
     <!-- HEADER -->
     <div class="text-center mt-8 mb-10 animate-in fade-in duration-700">
         <div class="relative inline-block mb-4 group cursor-pointer" onclick="document.getElementById('profile-input').click()">
-            <div id="user-avatar" class="w-24 h-24 bg-[#002B49] rounded-full flex items-center justify-center text-white border-4 border-white shadow-2xl overflow-hidden transition-all group-hover:scale-105">
+            <div id="user-avatar" class="w-24 h-24 bg-[var(--orange-main)] rounded-full flex items-center justify-center text-white border-4 border-white shadow-2xl overflow-hidden transition-all group-hover:scale-105">
                 <span id="user-initials" class="text-3xl font-black">--</span>
                 <img id="profile-img" class="hidden w-full h-full object-cover">
             </div>
@@ -20,7 +20,7 @@
             </div>
             <input type="file" id="profile-input" class="hidden" accept="image/*" onchange="uploadProfilePic(this)">
         </div>
-        <h1 class="text-3xl font-black text-[#002B49] tracking-tighter uppercase leading-none">Mi Portal</h1>
+        <h1 class="text-3xl font-black text-[var(--orange-700)] tracking-tighter uppercase leading-none">Mi Portal</h1>
         <p class="text-slate-600 font-bold text-sm mt-1 uppercase tracking-tight" id="student-name">Estudiante</p>
         <div class="flex justify-center gap-6 mt-4">
             <button onclick="showMyQR()" class="text-[10px] font-black text-[#FF4D00] hover:text-orange-600 uppercase flex items-center justify-center gap-2 tracking-widest transition-colors">
@@ -34,7 +34,7 @@
 
     <!-- TABS COMPLETOS -->
     <div class="flex gap-1 p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl mb-8 w-full max-w-md border border-white/20">
-        <button onclick="switchTab('asistencia')" id="tab-asistencia" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[#002B49] transition-all">Asistencia</button>
+        <button onclick="switchTab('asistencia')" id="tab-asistencia" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[var(--orange-700)] transition-all">Asistencia</button>
         <button onclick="switchTab('justificaciones')" id="tab-justificaciones" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-slate-500 transition-all">Justificaciones</button>
         <button onclick="switchTab('historial')" id="tab-historial" class="flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-slate-500 transition-all">Mi Historial</button>
     </div>
@@ -49,7 +49,7 @@
                         <i class="fas fa-calendar-check text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-black text-[#002B49] uppercase leading-none">Asistencia Hoy</h3>
+                        <h3 class="text-lg font-black text-[var(--orange-700)] uppercase leading-none">Asistencia Hoy</h3>
                         <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Valida tu presencia</p>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
 
             <div class="space-y-6">
                 <div class="flex items-center justify-between px-4">
-                    <h3 class="text-[10px] font-black text-[#002B49] uppercase tracking-[0.2em]">Progreso Académico</h3>
+                    <h3 class="text-[10px] font-black text-[var(--orange-700)] uppercase tracking-[0.2em]">Progreso Académico</h3>
                     <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Min. 80%</span>
                 </div>
                 <div id="progress-container" class="space-y-4"></div>
@@ -80,7 +80,7 @@
         <!-- PESTAÑA: JUSTIFICACIONES -->
         <div id="content-justificaciones" class="tab-pane hidden animate-in slide-in-from-bottom-4">
             <div class="glass-card p-8 text-center border-l-4 border-blue-500">
-                <h4 class="text-sm font-black text-[#002B49] uppercase mb-4">Cargar Excusa Médica</h4>
+                <h4 class="text-sm font-black text-[var(--orange-700)] uppercase mb-4">Cargar Excusa Médica</h4>
                 <div class="border-2 border-dashed border-slate-200 rounded-3xl p-10 mb-6 bg-slate-50/50 cursor-pointer" onclick="document.getElementById('file-input').click()">
                     <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-4"></i>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="file-name">Selecciona tu PDF o imagen aquí</p>
@@ -104,12 +104,12 @@
 <div id="scanner-modal" class="fixed inset-0 z-[200] hidden flex flex-col items-center justify-center p-6 transition-all duration-300">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="stopScanner()"></div>
     <div class="glass-card relative w-full max-w-sm z-10 p-8 shadow-2xl animate-in zoom-in-90">
-        <h2 class="text-[#002B49] text-center text-sm font-black uppercase mb-6">Escaneando QR</h2>
+        <h2 class="text-[var(--orange-700)] text-center text-sm font-black uppercase mb-6">Escaneando QR</h2>
         <div class="aspect-square rounded-[2rem] overflow-hidden bg-black shadow-inner border-4 border-slate-100 relative">
             <div id="reader" class="w-full h-full"></div>
             <div class="absolute inset-0 border-[30px] border-black/20 pointer-events-none"></div>
         </div>
-        <button onclick="stopScanner()" class="w-full mt-6 text-[#002B49] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar Escáner</button>
+        <button onclick="stopScanner()" class="w-full mt-6 text-[var(--orange-700)] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar Escáner</button>
     </div>
 </div>
 
@@ -117,13 +117,13 @@
 <div id="my-qr-modal" class="fixed inset-0 z-[200] hidden flex flex-col items-center justify-center p-6 transition-all duration-300">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="hideMyQR()"></div>
     <div class="glass-card relative w-full max-w-sm z-10 p-8 shadow-2xl animate-in zoom-in-90 flex flex-col items-center">
-        <h2 class="text-[#002B49] text-center text-sm font-black uppercase mb-6">Mi Código QR</h2>
+        <h2 class="text-[var(--orange-700)] text-center text-sm font-black uppercase mb-6">Mi Código QR</h2>
         <div class="p-4 bg-white rounded-2xl shadow-inner border-4 border-slate-100 flex items-center justify-center w-48 h-48 mb-4">
             <!-- Imagen del QR generada dinámicamente -->
             <img id="my-qr-img" src="" alt="Código QR" class="w-full h-full object-contain">
         </div>
         <p class="text-[10px] font-bold text-slate-500 uppercase text-center mb-6">Muestra este código al profesor para el registro manual</p>
-        <button onclick="hideMyQR()" class="w-full mt-2 text-[#002B49] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar</button>
+        <button onclick="hideMyQR()" class="w-full mt-2 text-[var(--orange-700)] font-black uppercase text-[10px] tracking-widest opacity-60">Cerrar</button>
     </div>
 </div>
 
@@ -311,7 +311,7 @@ function renderProgress(data) {
     document.getElementById('progress-container').innerHTML = data.map(i => `
         <div class="glass-card p-6">
             <div class="flex justify-between items-end mb-3">
-                <h4 class="text-sm font-black text-[#002B49] uppercase">${i.materia}</h4>
+                <h4 class="text-sm font-black text-[var(--orange-700)] uppercase">${i.materia}</h4>
                 <span class="text-lg font-black ${i.porcentaje < 80 ? 'text-red-500' : 'text-orange-500'}">${i.porcentaje}%</span>
             </div>
             <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -332,7 +332,7 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
     document.getElementById(`content-${tab}`).classList.remove('hidden');
     document.querySelectorAll('button[id^="tab-"]').forEach(b => b.className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl text-slate-500 transition-all");
-    document.getElementById(`tab-${tab}`).className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[#002B49] transition-all";
+    document.getElementById(`tab-${tab}`).className = "flex-1 py-3 text-[9px] font-black uppercase rounded-xl bg-white shadow-sm text-[var(--orange-700)] transition-all";
     if (tab === 'historial') loadMyHistory();
 }
 
@@ -347,7 +347,7 @@ async function loadMyHistory() {
         document.getElementById('student-history').innerHTML = mine.length ? mine.map(h => `
             <div class="glass-card p-4 flex justify-between items-center animate-in slide-in-from-right border-l-4 ${h.status === 'manual' ? 'border-blue-500' : 'border-emerald-500'}">
                 <div class="flex flex-col">
-                    <p class="font-black text-xs text-[#002B49] uppercase tracking-tight">${h.materia}</p>
+                    <p class="font-black text-xs text-[var(--orange-700)] uppercase tracking-tight">${h.materia}</p>
                     <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">
                         <i class="fas fa-clock mr-1"></i> ${h.fecha.split(' ')[0]} - ${h.fecha.split(' ')[1]}
                     </p>

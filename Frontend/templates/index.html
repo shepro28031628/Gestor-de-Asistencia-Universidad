@@ -3,29 +3,29 @@
 <div class="min-h-screen flex items-center justify-center p-6">
     <div class="max-w-md w-full glass-card p-10 animate-in">
         <div class="text-center mb-10">
-            <!-- LOGO LOCAL SEGURO -->
+            <!-- LOGO INSTITUCIONAL RESTAURADO -->
             <img src="/static/img/logo.png" alt="UNINPAHU" class="h-24 mx-auto mb-4 drop-shadow-md">
-            <h1 class="text-3xl font-black text-[#002B49] tracking-tighter uppercase">Asistencia</h1>
+            <h1 class="text-3xl font-black text-[var(--orange-main)] tracking-tighter uppercase">Asistencia</h1>
             <p class="text-slate-500 font-bold text-[10px] tracking-[0.2em] uppercase mt-2">Plataforma Académica</p>
         </div>
 
-        <div class="bg-slate-100 p-1.5 rounded-2xl mb-8 flex gap-1 border border-slate-200">
-            <button onclick="setRole('estudiante')" id="btn-estudiante" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[#002B49] transition-all">Estudiante</button>
-            <button onclick="setRole('profesor')" id="btn-profesor" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-[#002B49] transition-all">Docente</button>
+        <div class="bg-[var(--orange-soft)] p-1.5 rounded-2xl mb-8 flex gap-1 border border-[var(--orange-border)]">
+            <button onclick="setRole('estudiante')" id="btn-estudiante" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[var(--orange-main)] transition-all">Estudiante</button>
+            <button onclick="setRole('profesor')" id="btn-profesor" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-gray-400 hover:text-[var(--orange-main)] transition-all">Docente</button>
         </div>
 
         <div class="space-y-5">
             <div class="space-y-2">
-                <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider bg-[#F8FAFC] px-2 py-1 inline-block border-l-2 border-[#E2E8F0]">NÚMERO DE DOCUMENTO</label>
-                <input type="text" id="username" placeholder="Tu número de cédula o T.I." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:border-[#002B49] outline-none font-bold text-[#002B49]">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider bg-white px-2 py-1 inline-block border-l-2 border-[var(--orange-main)]">NÚMERO DE DOCUMENTO</label>
+                <input type="text" id="username" placeholder="Tu número de cédula o T.I." class="w-full bg-[var(--orange-soft)] border-2 border-[var(--orange-border)] rounded-2xl px-6 py-4 focus:border-[var(--orange-main)] focus:bg-white outline-none font-bold text-[var(--orange-main)] transition-all">
             </div>
 
             <div class="space-y-1.5">
-                <label class="text-[10px] font-bold text-[#002B49] uppercase tracking-widest ml-1">Contraseña</label>
-                <input type="password" id="password" placeholder="••••" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:border-[#002B49] outline-none font-bold text-[#002B49]">
+                <label class="text-[10px] font-bold text-[var(--orange-main)] uppercase tracking-widest ml-1">Contraseña</label>
+                <input type="password" id="password" placeholder="••••" class="w-full bg-[var(--orange-soft)] border-2 border-[var(--orange-border)] rounded-2xl px-6 py-4 focus:border-[var(--orange-main)] focus:bg-white outline-none font-bold text-[var(--orange-main)] transition-all">
             </div>
 
-            <button onclick="handleLogin()" class="w-full bg-[#002B49] text-white py-5 rounded-2xl font-black shadow-xl active:scale-95 transition-all mt-4 flex items-center justify-center gap-3">
+            <button onclick="handleLogin()" class="w-full btn-uninpahu-orange py-5 rounded-2xl font-black shadow-xl active:scale-95 transition-all mt-4 flex items-center justify-center gap-3">
                 <span>INGRESAR AL PORTAL</span>
                 <i class="fas fa-arrow-right text-xs"></i>
             </button>
@@ -44,8 +44,8 @@ function setRole(role) {
     currentRole = role;
     const btnEst = document.getElementById('btn-estudiante');
     const btnProf = document.getElementById('btn-profesor');
-    const active = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[#002B49] transition-all";
-    const inactive = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400 hover:text-[#002B49] transition-all";
+    const active = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white shadow-sm text-[var(--orange-main)] transition-all";
+    const inactive = "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-gray-400 hover:text-[var(--orange-main)] transition-all";
     
     // Aplicamos clases de estilo según el botón presionado
     btnEst.className = role === 'estudiante' ? active : inactive;
