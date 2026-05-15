@@ -58,9 +58,9 @@
                 </select>
 
                 <!-- INDICADOR DE UBICACIÓN REAL (DINÁMICO) -->
-                <div id="location-status" class="flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-slate-100 rounded-xl border border-slate-200 transition-all">
+                <div id="location-status" onclick="validateRealLocation()" class="flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-slate-100 rounded-xl border border-slate-200 cursor-pointer active:scale-95 transition-all">
                     <i id="loc-icon" class="fas fa-location-arrow text-slate-400 text-[10px]"></i>
-                    <span id="loc-text" class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Esperando Ubicación...</span>
+                    <span id="loc-text" class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Toca para activar GPS</span>
                 </div>
 
                 <button onclick="startScanner()" class="w-full bg-[#FF4D00] text-white py-5 rounded-2xl text-xs font-black flex items-center justify-center gap-3 shadow-xl hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest shadow-orange-500/20">
@@ -400,7 +400,6 @@ function validateRealLocation() {
         const userLat = pos.coords.latitude;
         const userLng = pos.coords.longitude;
         
-        // Coordenadas de las Sedes (Mismo que en DB para coherencia)
         const sedes = [
             {n: 'Teusaquillo', lat: 4.6300, lng: -74.0684},
             {n: 'Principal', lat: 4.6318, lng: -74.0665},
@@ -410,7 +409,7 @@ function validateRealLocation() {
         let inside = false;
         sedes.forEach(s => {
             const dist = calculateDistance(userLat, userLng, s.lat, s.lng);
-            if (dist <= 150) inside = true; // Margen de 150m
+            if (dist <= 150) inside = true;
         });
 
         const status = document.getElementById('location-status');
@@ -421,7 +420,7 @@ function validateRealLocation() {
             status.className = "flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-emerald-50 rounded-xl border border-emerald-100 animate-pulse";
             icon.className = "fas fa-location-dot text-emerald-500 text-[10px]";
             text.className = "text-[9px] font-black text-emerald-600 uppercase tracking-tighter";
-            text.innerText = "Ubicación Institucional Validada";
+            text.innerText = "Ubicación Validada";
         } else {
             status.className = "flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-red-50 rounded-xl border border-red-100";
             icon.className = "fas fa-circle-exclamation text-red-500 text-[10px]";
@@ -430,8 +429,11 @@ function validateRealLocation() {
         }
     }, err => {
         const text = document.getElementById('loc-text');
-        text.innerText = "Error GPS: Activa tu ubicación";
-    }, { enableHighAccuracy: true });
+        const status = document.getElementById('location-status');
+        status.classList.add('bg-orange-50', 'border-orange-200');
+        text.innerText = "Click aquí para activar GPS";
+        console.error(err);
+    }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
