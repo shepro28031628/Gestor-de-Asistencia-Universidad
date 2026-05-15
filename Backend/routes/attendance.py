@@ -105,10 +105,10 @@ def marcar_asistencia():
         if session['day'] != get_dia_code(now) or now > datetime.fromisoformat(session['expires_at']):
             return jsonify({"success": False, "message": "QR fuera de tiempo o día"}), 403
         
-        # GEOFENCING: Validación de ubicación física
+        # GEOFENCING: Validación estricta de ubicación física
         distancia = haversine_distance(data.get('lat'), data.get('lng'), session['latitude'], session['longitude'])
-        if distancia > session['radius_meters'] and session['latitude'] != 0:
-            return jsonify({"success": False, "message": "Fuera de rango"}), 403
+        if distancia > session['radius_meters']:
+            return jsonify({"success": False, "message": "Fuera de rango institucional"}), 403
             
         try:
             # Registro oficial en la base de datos

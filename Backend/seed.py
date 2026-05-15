@@ -36,7 +36,7 @@ def restore_database():
     ]
     cursor.executemany("INSERT INTO users (username, password, full_name, role, email) VALUES (?,?,?,?,?)", profesores)
     
-    # --- DATOS DE PRUEBA: SEDES Y SALONES REALES ---
+    # --- SEDES INSTITUCIONALES UNINPAHU ---
     sedes = [
         ('Sede Teusaquillo (Dg. 40a)', 4.6300, -74.0684, 100),
         ('Sede Principal (Cra. 16)', 4.6318, -74.0665, 100),

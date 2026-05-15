@@ -57,10 +57,10 @@
                     <option value="">Cargando clases...</option>
                 </select>
 
-                <!-- INDICADOR DE UBICACIÓN VALIDADA -->
-                <div class="flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-emerald-50 rounded-xl border border-emerald-100 animate-pulse">
-                    <i class="fas fa-location-dot text-emerald-500 text-[10px]"></i>
-                    <span class="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Ubicación Institucional Validada</span>
+                <!-- INDICADOR DE UBICACIÓN REAL (DINÁMICO) -->
+                <div id="location-status" class="flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-slate-100 rounded-xl border border-slate-200 transition-all">
+                    <i id="loc-icon" class="fas fa-location-arrow text-slate-400 text-[10px]"></i>
+                    <span id="loc-text" class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Esperando Ubicación...</span>
                 </div>
 
                 <button onclick="startScanner()" class="w-full bg-[#FF4D00] text-white py-5 rounded-2xl text-xs font-black flex items-center justify-center gap-3 shadow-xl hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest shadow-orange-500/20">
@@ -390,8 +390,63 @@ function hideMyQR() {
     document.getElementById('my-qr-modal').classList.add('hidden');
 }
 
+/**
+ * Valida si el estudiante está físicamente en alguna de las sedes institucionales.
+ */
+function validateRealLocation() {
+    if (!navigator.geolocation) return;
+    
+    navigator.geolocation.watchPosition(pos => {
+        const userLat = pos.coords.latitude;
+        const userLng = pos.coords.longitude;
+        
+        // Coordenadas de las Sedes (Mismo que en DB para coherencia)
+        const sedes = [
+            {n: 'Teusaquillo', lat: 4.6300, lng: -74.0684},
+            {n: 'Principal', lat: 4.6318, lng: -74.0665},
+            {n: 'Parkway', lat: 4.6310, lng: -74.0685}
+        ];
+
+        let inside = false;
+        sedes.forEach(s => {
+            const dist = calculateDistance(userLat, userLng, s.lat, s.lng);
+            if (dist <= 150) inside = true; // Margen de 150m
+        });
+
+        const status = document.getElementById('location-status');
+        const icon = document.getElementById('loc-icon');
+        const text = document.getElementById('loc-text');
+
+        if (inside) {
+            status.className = "flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-emerald-50 rounded-xl border border-emerald-100 animate-pulse";
+            icon.className = "fas fa-location-dot text-emerald-500 text-[10px]";
+            text.className = "text-[9px] font-black text-emerald-600 uppercase tracking-tighter";
+            text.innerText = "Ubicación Institucional Validada";
+        } else {
+            status.className = "flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-red-50 rounded-xl border border-red-100";
+            icon.className = "fas fa-circle-exclamation text-red-500 text-[10px]";
+            text.className = "text-[9px] font-black text-red-600 uppercase tracking-tighter";
+            text.innerText = "Fuera de la Universidad";
+        }
+    }, err => {
+        const text = document.getElementById('loc-text');
+        text.innerText = "Error GPS: Activa tu ubicación";
+    }, { enableHighAccuracy: true });
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const p1 = lat1 * Math.PI/180;
+    const p2 = lat2 * Math.PI/180;
+    const dp = (lat2-lat1) * Math.PI/180;
+    const dl = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 // --- CICLO DE VIDA DE LA APP ---
 sync(); // Carga inicial
+validateRealLocation(); // Validación proactiva
 syncOfflineQueue(); // Intenta limpiar la cola pendiente al arrancar
 setInterval(checkLiveSessions, 5000); // Polling cada 5 seg
 window.addEventListener('online', syncOfflineQueue); // Listener para reconexión
