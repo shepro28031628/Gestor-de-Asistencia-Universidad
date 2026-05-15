@@ -5,8 +5,9 @@ const CACHE_NAME = 'uninpahu-v1';
 const ASSETS = [
   '/',
   '/static/css/main.css',
-  '/static/img/logo.png',
-  '/static/img/uninpahu_bg.png'
+  '/static/img/LOGO.png',
+  '/static/img/uninpahu_bg.png',
+  '/static/img/Icono-1.webp'
 ];
 
 /**
