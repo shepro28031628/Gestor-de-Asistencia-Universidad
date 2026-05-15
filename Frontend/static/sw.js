@@ -1,5 +1,5 @@
 // Nombre del contenedor de caché (versión)
-const CACHE_NAME = 'uninpahu-v1';
+const CACHE_NAME = 'uninpahu-v2';
 
 // Lista de archivos estáticos que se guardarán para uso offline
 const ASSETS = [
@@ -16,6 +16,17 @@ const ASSETS = [
  */
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
+});
+
+/**
+ * Evento de activación: Limpia versiones antiguas de caché para evitar conflictos.
+ */
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    })
+  );
 });
 
 /**
