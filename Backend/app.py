@@ -57,7 +57,13 @@ def create_app():
         session.clear()
         return redirect(url_for('index'))
 
-    # --- 2. REGISTRO DE MÓDULOS API (Lógica de Negocio) ---
+    # --- 3. RUTAS TÉCNICAS (PWA & Service Worker) ---
+    @app.route('/sw.js')
+    def serve_sw():
+        """Sirve el Service Worker desde la raíz para tener control total del sitio."""
+        return app.send_static_file('sw.js')
+
+    # --- 4. REGISTRO DE MÓDULOS API (Lógica de Negocio) ---
     # Módulo de Autenticación y Perfiles
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     # Módulo de Asistencia, QR y Reportes

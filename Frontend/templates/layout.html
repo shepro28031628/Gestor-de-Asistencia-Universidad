@@ -57,8 +57,8 @@
         // REGISTRO DE PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/sw.js').then(reg => {
-                    console.log('PWA Lista para UNINPAHU');
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('PWA Lista para UNINPAHU (Scope Raíz)');
                 });
             });
         }
