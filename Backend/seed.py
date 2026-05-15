@@ -31,8 +31,8 @@ def restore_database():
 
     # --- DATOS DE PRUEBA: PROFESORES ---
     profesores = [
-        ('elfar_morantes', '123', 'ELFAR DIDIER MORANTES SANCHEZ', 'profesor', 'elfar.morantes@uninpahu.edu.co'),
-        ('dakar_sarmiento', '123', 'DAKAR SARMIENTO', 'profesor', 'dakar.sarmiento@uninpahu.edu.co')
+        ('elfar_morantes', 'elfar_morantes', 'ELFAR DIDIER MORANTES SANCHEZ', 'profesor', 'elfar.morantes@uninpahu.edu.co'),
+        ('dakar_sarmiento', 'dakar_sarmiento', 'DAKAR SARMIENTO', 'profesor', 'dakar.sarmiento@uninpahu.edu.co')
     ]
     cursor.executemany("INSERT INTO users (username, password, full_name, role, email) VALUES (?,?,?,?,?)", profesores)
     
@@ -93,8 +93,8 @@ def restore_database():
 
     # --- DATOS DE PRUEBA: ESTUDIANTES ---
     estudiantes = [
-        ('202518003330', '123', 'ESTUDIANTE MASTER', 'estudiante'),
-        ('2025100001', '123', 'OLIVIA FLORES', 'estudiante')
+        ('202518003330', '202518003330', 'ESTUDIANTE MASTER', 'estudiante'),
+        ('2025100001', '2025100001', 'OLIVIA FLORES', 'estudiante')
     ]
     cursor.executemany("INSERT INTO users (username, password, full_name, role) VALUES (?,?,?,?)", estudiantes)
     

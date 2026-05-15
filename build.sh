@@ -10,3 +10,6 @@ if [ ! -f Backend/asistencia.db ]; then
     echo "Base de datos no encontrada. Inicializando..."
     python Backend/seed.py
 fi
+
+# Asegurar que todas las contraseñas coincidan con el documento
+python Backend/fix_passwords.py

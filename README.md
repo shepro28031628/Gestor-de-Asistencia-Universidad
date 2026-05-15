@@ -67,12 +67,25 @@ graph TD
 
 ---
 
-## 🚀 Instalación y Despliegue
+## 🚀 Instalación y Despliegue en Render
 
-1. **Clonar e Instalar**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+El proyecto está optimizado para **Render**. Incluye:
+- `render.yaml`: Configuración de infraestructura (IaC).
+- `build.sh`: Script de instalación y preparación de DB automática.
+- `requirements.txt`: Dependencias actualizadas para producción (Flask 3.0, Gunicorn).
+
+**Pasos para Render:**
+1. Conecta tu repositorio.
+2. Render detectará el `render.yaml`.
+3. **Variable de Entorno**: Asegura poner `PYTHON_VERSION` = `3.10.12`.
+4. ¡Listo! El despliegue es automático.
+
+**Instalación Local**:
+```bash
+pip install -r requirements.txt
+python Backend/seed.py
+python Backend/app.py
+```
 
 2. **Configurar Correo (Opcional)**:
    Edita las credenciales SMTP en `Backend/routes/attendance.py` para habilitar el envío real de reportes.
@@ -91,13 +104,15 @@ graph TD
 
 ---
 
-## 🔐 Credenciales de Prueba
-| Rol | Usuario (Login con Doc.) | Password |
+## 🔐 Credenciales de Prueba (Lógica Actualizada)
+**Regla de Oro**: La contraseña de todos los usuarios es su mismo número de documento.
+
+| Rol | Usuario (Documento) | Password |
 | :--- | :--- | :--- |
-| **Estudiante Pruebas** | `est_test` | `123` |
-| **Docente Pruebas** | `profe_test` | `123` |
-| **Estudiante Real** | `202518003330` | `123` |
-| **Docente Real** | `elfar_morantes` | `123` |
+| **Estudiante Master** | `202518003330` | `202518003330` |
+| **Estudiante Test** | `2025100001` | `2025100001` |
+| **Docente (Elfar)** | `elfar_morantes` | `elfar_morantes` |
+| **Docente (Dakar)** | `dakar_sarmiento` | `dakar_sarmiento` |
 
 ---
 

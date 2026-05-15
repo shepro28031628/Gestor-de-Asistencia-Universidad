@@ -20,6 +20,7 @@ Si no desea usar Blueprints, cree un **Web Service** con los siguientes datos:
 - **Runtime**: `Python 3`
 - **Build Command**: `bash build.sh`
 - **Start Command**: `PYTHONPATH=Backend gunicorn 'app:create_app()'`
+- **Variable de Entorno**: Agregue `PYTHON_VERSION` con el valor `3.10.12` en la pestaña **Settings** para asegurar compatibilidad.
 
 ## 4. Notas Técnicas sobre Base de Datos
 - Actualmente se usa **SQLite**.
@@ -41,5 +42,4 @@ Si no desea usar Blueprints, cree un **Web Service** con los siguientes datos:
 [ App Online ]
 ```
 
----
-*Mantenimiento: Ingeniero Senior Conservador*
+
