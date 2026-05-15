@@ -401,15 +401,17 @@ function validateRealLocation() {
         const userLng = pos.coords.longitude;
         
         const sedes = [
-            {n: 'Teusaquillo', lat: 4.6300, lng: -74.0684},
-            {n: 'Principal', lat: 4.6318, lng: -74.0665},
+            {n: 'Teusaquillo', lat: 4.6299, lng: -74.0683},
+            {n: 'Principal', lat: 4.6289, lng: -74.0681},
             {n: 'Parkway', lat: 4.6310, lng: -74.0685}
         ];
 
         let inside = false;
+        let minDistance = 999999;
         sedes.forEach(s => {
             const dist = calculateDistance(userLat, userLng, s.lat, s.lng);
-            if (dist <= 150) inside = true;
+            if (dist < minDistance) minDistance = dist;
+            if (dist <= 300) inside = true; 
         });
 
         const status = document.getElementById('location-status');
@@ -425,7 +427,7 @@ function validateRealLocation() {
             status.className = "flex items-center justify-center gap-2 mb-6 py-2 px-4 bg-red-50 rounded-xl border border-red-100";
             icon.className = "fas fa-circle-exclamation text-red-500 text-[10px]";
             text.className = "text-[9px] font-black text-red-600 uppercase tracking-tighter";
-            text.innerText = "Fuera de la Universidad";
+            text.innerText = `Fuera de la Universidad (${Math.round(minDistance)}m)`;
         }
     }, err => {
         const text = document.getElementById('loc-text');
